@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sicero — The AI Shopping Concierge</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #07091A;
+            --bg-secondary: #0D1028;
+            --bg-card: #111827;
+            --bg-card-hover: #161D38;
+            --gold: #C9A84C;
+            --gold-light: #E2C97E;
+            --gold-dim: rgba(201, 168, 76, 0.12);
+            --purple: #6D4FC2;
+            --purple-light: #9B7FE8;
+            --text-primary: #F0F2FF;
+            --text-secondary: #8892B0;
+            --text-muted: #4A5568;
+            --border: rgba(201, 168, 76, 0.18);
+            --border-subtle: rgba(255, 255, 255, 0.06);
+            --shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-primary); color: var(--text-primary); overflow-x: hidden; }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: var(--bg-secondary); }
+        ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 3px; }
+
+        /* ── NAV ── */
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            padding: 18px 60px;
+            display: flex; align-items: center; justify-content: space-between;
+            background: rgba(7, 9, 26, 0.88); backdrop-filter: blur(24px);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .logo-icon {
+            width: 38px; height: 38px;
+            background: linear-gradient(135deg, var(--gold), var(--purple));
+            border-radius: 10px; display: flex; align-items: center; justify-content: center;
+            font-size: 17px; color: #fff; box-shadow: 0 0 20px rgba(201,168,76,0.25);
+        }
+        .logo-text { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--text-primary); letter-spacing: 0.5px; }
+        .logo-text span { color: var(--gold); }
+        .nav-links { display: flex; gap: 36px; list-style: none; }
+        .nav-links a { text-decoration: none; color: var(--text-secondary); font-size: 14px; font-weight: 500; transition: color 0.2s; }
+        .nav-links a:hover { color: var(--gold); }
+        .nav-cta { display: flex; gap: 10px; align-items: center; }
+        .btn-ghost { padding: 8px 20px; border: 1px solid var(--border-subtle); border-radius: 8px; background: transparent; color: var(--text-secondary); font-size: 14px; font-weight: 500; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; }
+        .btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+        .btn-gold { padding: 8px 22px; border: none; border-radius: 8px; background: linear-gradient(135deg, var(--gold), #A8732E); color: #080808; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; }
+        .btn-gold:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(201,168,76,0.35); }
+
+        /* ── HERO ── */
+        .hero { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 130px 40px 90px; position: relative; overflow: hidden; }
+        .hero-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 90% 60% at 50% -10%, rgba(109,79,194,0.18) 0%, transparent 65%), radial-gradient(ellipse 60% 60% at 85% 90%, rgba(201,168,76,0.07) 0%, transparent 55%), radial-gradient(ellipse 40% 40% at 10% 70%, rgba(109,79,194,0.05) 0%, transparent 50%); }
+        .particle { position: absolute; border-radius: 50%; pointer-events: none; animation: floatParticle linear infinite; }
+        @keyframes floatParticle { 0% { transform: translateY(100vh) rotate(0deg); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translateY(-100px) rotate(360deg); opacity: 0; } }
+        .hero-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px; border: 1px solid var(--border); border-radius: 100px; background: var(--gold-dim); color: var(--gold-light); font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 28px; position: relative; }
+        .badge-dot { width: 6px; height: 6px; background: var(--gold); border-radius: 50%; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.4); } }
+        .hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(44px, 6.5vw, 84px); font-weight: 700; line-height: 1.08; max-width: 820px; margin-bottom: 24px; position: relative; }
+        .grad-text { background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 40%, var(--purple-light) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .hero p { font-size: 18px; color: var(--text-secondary); max-width: 540px; line-height: 1.75; margin-bottom: 44px; position: relative; font-weight: 400; }
+        .hero-actions { display: flex; gap: 14px; align-items: center; position: relative; }
+        .btn-hero { padding: 15px 34px; font-size: 16px; border-radius: 12px; }
+        .hero-scroll { position: relative; margin-top: 80px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .scroll-line { width: 1px; height: 60px; background: linear-gradient(to bottom, transparent, var(--gold), transparent); animation: scrollPulse 2s infinite; }
+        @keyframes scrollPulse { 0%, 100% { opacity: 0.3; transform: scaleY(0.7); } 50% { opacity: 1; transform: scaleY(1); } }
+        .scroll-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); font-weight: 500; }
+
+        /* ── TRUST BAR ── */
+        .trust-bar { background: var(--bg-secondary); border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle); padding: 28px 60px; display: flex; align-items: center; justify-content: center; gap: 64px; }
+        .trust-item { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .trust-number { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; color: var(--gold); line-height: 1; }
+        .trust-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 500; }
+        .trust-divider { width: 1px; height: 44px; background: var(--border-subtle); }
+
+        /* ── SECTION COMMONS ── */
+        .section-wrap { max-width: 1320px; margin: 0 auto; }
+        .section-head { text-align: center; margin-bottom: 56px; }
+        .section-label { font-size: 10px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; color: var(--gold); margin-bottom: 12px; }
+        .section-title { font-family: 'Playfair Display', serif; font-size: clamp(28px, 4vw, 46px); font-weight: 700; margin-bottom: 14px; line-height: 1.15; }
+        .section-sub { font-size: 16px; color: var(--text-secondary); max-width: 500px; margin: 0 auto; line-height: 1.65; }
+
+        /* ── MARKETPLACE / CHAT ── */
+        .marketplace { padding: 100px 40px; max-width: 1320px; margin: 0 auto; }
+        .chat-app { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; min-height: 700px; }
+        .chat-panel, .results-panel { background: var(--bg-secondary); border: 1px solid var(--border-subtle); border-radius: 22px; display: flex; flex-direction: column; overflow: hidden; }
+        .panel-header { padding: 16px 20px; border-bottom: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.015); flex-shrink: 0; }
+        .agent-pill { display: flex; align-items: center; gap: 12px; }
+
+        /* ── AVATAR ── */
+        .agent-avatar-wrap {
+            position: relative; width: 48px; height: 48px; flex-shrink: 0; cursor: pointer;
+        }
+        .agent-avatar {
+            width: 48px; height: 48px;
+            background: linear-gradient(135deg, var(--purple), var(--gold));
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; color: #fff;
+            box-shadow: 0 4px 16px rgba(109,79,194,0.35);
+            position: relative; z-index: 1; transition: all 0.3s;
+        }
+        .agent-avatar.speaking {
+            box-shadow: 0 0 0 3px rgba(201,168,76,0.4), 0 4px 24px rgba(201,168,76,0.3);
+            animation: avatarSpeak 0.6s ease infinite alternate;
+        }
+        .agent-avatar.listening {
+            box-shadow: 0 0 0 4px rgba(74,222,128,0.5), 0 4px 24px rgba(74,222,128,0.3);
+            animation: avatarListen 1s ease infinite;
+        }
+        @keyframes avatarSpeak { from { transform: scale(1); } to { transform: scale(1.06); } }
+        @keyframes avatarListen { 0%, 100% { box-shadow: 0 0 0 4px rgba(74,222,128,0.5), 0 4px 24px rgba(74,222,128,0.3); } 50% { box-shadow: 0 0 0 10px rgba(74,222,128,0.15), 0 4px 40px rgba(74,222,128,0.4); } }
+        .avatar-ring {
+            position: absolute; inset: -6px; border-radius: 18px;
+            border: 1.5px solid transparent;
+            animation: ringRotate 3s linear infinite;
+            background: linear-gradient(var(--bg-secondary), var(--bg-secondary)) padding-box,
+                        linear-gradient(135deg, var(--gold), transparent, var(--purple)) border-box;
+        }
+        @keyframes ringRotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        .agent-name { font-size: 15px; font-weight: 600; }
+        .agent-status { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #4ADE80; margin-top: 3px; }
+        .status-dot { width: 6px; height: 6px; background: #4ADE80; border-radius: 50%; animation: pulse 2s infinite; }
+        .panel-actions { display: flex; gap: 8px; }
+        .icon-btn { width: 34px; height: 34px; border: 1px solid var(--border-subtle); border-radius: 8px; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all 0.2s; color: var(--text-muted); }
+        .icon-btn:hover { border-color: var(--border); color: var(--text-primary); background: rgba(255,255,255,0.04); }
+
+        /* Chat messages */
+        .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; scroll-behavior: smooth; }
+        .chat-messages::-webkit-scrollbar { width: 3px; }
+        .chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+        .message { display: flex; gap: 10px; animation: msgIn 0.3s ease; }
+        .message.user { flex-direction: row-reverse; }
+        @keyframes msgIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .msg-avatar { width: 32px; height: 32px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+        .msg-avatar.ai { background: linear-gradient(135deg, var(--purple), #4533A0); color: #fff; }
+        .msg-avatar.hu { background: var(--gold-dim); border: 1px solid var(--border); color: var(--gold); font-weight: 700; font-size: 11px; }
+        .msg-wrap { max-width: 78%; }
+        .msg-bubble { padding: 12px 15px; border-radius: 16px; font-size: 13.5px; line-height: 1.65; }
+        .message.ai .msg-bubble { background: var(--bg-card); border: 1px solid var(--border-subtle); color: var(--text-primary); border-top-left-radius: 4px; }
+        .message.user .msg-bubble { background: linear-gradient(135deg, rgba(201,168,76,0.13), rgba(201,168,76,0.07)); border: 1px solid var(--border); color: var(--text-primary); border-top-right-radius: 4px; }
+        .msg-time { font-size: 10.5px; color: var(--text-muted); margin-top: 5px; }
+        .message.user .msg-time { text-align: right; }
+        .typing-indicator { display: flex; gap: 4px; padding: 12px 16px; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 16px; border-top-left-radius: 4px; width: fit-content; }
+        .typing-dot { width: 6px; height: 6px; background: var(--text-muted); border-radius: 50%; animation: typing 1.2s infinite; }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typing { 0%, 60%, 100% { transform: translateY(0); opacity: 0.35; } 30% { transform: translateY(-7px); opacity: 1; } }
+
+        /* Suggestion chips */
+        .suggestions { padding: 10px 18px; border-top: 1px solid var(--border-subtle); display: flex; gap: 7px; flex-wrap: wrap; flex-shrink: 0; }
+        .chip { padding: 5px 12px; border: 1px solid var(--border-subtle); border-radius: 100px; font-size: 11.5px; color: var(--text-secondary); cursor: pointer; transition: all 0.2s; background: transparent; font-family: 'Inter', sans-serif; }
+        .chip:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
+
+        /* Chat input + voice */
+        .chat-footer { padding: 12px 16px; border-top: 1px solid var(--border-subtle); display: flex; gap: 8px; align-items: flex-end; flex-shrink: 0; }
+        .chat-input { flex: 1; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 11px 15px; color: var(--text-primary); font-size: 13.5px; font-family: 'Inter', sans-serif; resize: none; outline: none; transition: border-color 0.2s; min-height: 44px; max-height: 120px; }
+        .chat-input:focus { border-color: rgba(201,168,76,0.3); }
+        .chat-input::placeholder { color: var(--text-muted); }
+        .send-btn { width: 44px; height: 44px; background: linear-gradient(135deg, var(--gold), #9A6A2A); border: none; border-radius: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; }
+        .send-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 18px rgba(201,168,76,0.35); }
+        .send-btn svg { width: 17px; height: 17px; fill: #050505; }
+
+        /* Mic button */
+        .mic-btn {
+            width: 44px; height: 44px; border: 1px solid var(--border);
+            border-radius: 11px; background: transparent; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s; flex-shrink: 0; font-size: 18px;
+            color: var(--text-muted);
+        }
+        .mic-btn:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
+        .mic-btn.recording {
+            background: rgba(239,68,68,0.12);
+            border-color: rgba(239,68,68,0.5);
+            color: #EF4444;
+            animation: micPulse 1s ease infinite;
+        }
+        @keyframes micPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.3); } 50% { box-shadow: 0 0 0 8px rgba(239,68,68,0); } }
+
+        /* Results panel */
+        .results-header-row { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+        .results-title-wrap { display: flex; align-items: center; gap: 8px; }
+        .results-title { font-size: 14.5px; font-weight: 600; }
+        .count-badge { background: var(--gold-dim); border: 1px solid var(--border); color: var(--gold); font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 100px; }
+        .filter-row { display: flex; gap: 6px; }
+        .f-chip { padding: 4px 10px; border: 1px solid var(--border-subtle); border-radius: 6px; font-size: 11px; color: var(--text-muted); background: transparent; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; }
+        .f-chip.on { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
+        .results-body { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 11px; }
+        .results-body::-webkit-scrollbar { width: 3px; }
+        .results-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+        .empty-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 60px 40px; color: var(--text-muted); }
+        .empty-icon { font-size: 44px; margin-bottom: 16px; opacity: 0.35; }
+        .empty-state h3 { font-size: 15px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; }
+        .empty-state p { font-size: 13px; line-height: 1.6; max-width: 250px; }
+
+        /* Searching animation in results */
+        .searching-row { display: flex; align-items: center; gap: 10px; padding: 14px; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 12px; animation: msgIn 0.3s ease; }
+        .search-spinner { width: 18px; height: 18px; border: 2px solid var(--border); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .searching-text { font-size: 12.5px; color: var(--text-secondary); }
+
+        /* Product card */
+        .product-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 14px; padding: 14px; cursor: pointer; transition: all 0.22s; animation: msgIn 0.3s ease; display: flex; gap: 13px; }
+        .product-card:hover { border-color: rgba(201,168,76,0.22); background: var(--bg-card-hover); transform: translateY(-2px); box-shadow: var(--shadow); }
+        .prod-img { width: 68px; height: 68px; border-radius: 10px; background: linear-gradient(135deg, var(--bg-primary), var(--bg-secondary)); display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0; border: 1px solid var(--border-subtle); }
+        .prod-info { flex: 1; min-width: 0; }
+        .prod-cat { font-size: 9.5px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--purple-light); margin-bottom: 3px; }
+        .prod-name { font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; }
+        .prod-desc { font-size: 11.5px; color: var(--text-secondary); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .prod-row { display: flex; align-items: center; justify-content: space-between; margin-top: 9px; flex-wrap: wrap; gap: 6px; }
+        .prod-price { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 700; color: var(--gold); }
+        .prod-meta { display: flex; align-items: center; gap: 7px; }
+        .rating { display: flex; align-items: center; gap: 3px; font-size: 11px; color: var(--text-secondary); }
+        .star { color: var(--gold); font-size: 10px; }
+        .match-badge { font-size: 9.5px; font-weight: 700; padding: 2px 7px; border-radius: 100px; background: rgba(74,222,128,0.1); color: #4ADE80; border: 1px solid rgba(74,222,128,0.2); }
+        .prod-btns { display: flex; gap: 7px; margin-top: 8px; }
+        .btn-cart { padding: 5px 12px; border: none; border-radius: 7px; background: linear-gradient(135deg, var(--gold), #9A6A2A); color: #060606; font-size: 10.5px; font-weight: 700; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; }
+        .btn-cart:hover { transform: translateY(-1px); box-shadow: 0 3px 12px rgba(201,168,76,0.3); }
+        .btn-view { padding: 5px 12px; border: 1px solid var(--border); border-radius: 7px; background: transparent; color: var(--gold); font-size: 10.5px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; }
+        .btn-view:hover { background: var(--gold-dim); }
+
+        /* ── VOICE AVATAR MODAL ── */
+        .voice-modal {
+            display: none; position: fixed; inset: 0; z-index: 200;
+            background: rgba(7,9,26,0.92); backdrop-filter: blur(20px);
+            align-items: center; justify-content: center;
+        }
+        .voice-modal.open { display: flex; }
+        .voice-modal-inner {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 28px; padding: 48px 40px;
+            display: flex; flex-direction: column; align-items: center;
+            gap: 24px; max-width: 420px; width: 90%;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.6);
+            position: relative;
+        }
+        .voice-modal-close {
+            position: absolute; top: 16px; right: 16px;
+            width: 32px; height: 32px; border: 1px solid var(--border-subtle);
+            border-radius: 8px; background: transparent; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--text-muted); font-size: 16px; transition: all 0.2s;
+        }
+        .voice-modal-close:hover { border-color: var(--border); color: var(--text-primary); }
+
+        /* Big animated avatar orb */
+        .avatar-orb-wrap { position: relative; width: 160px; height: 160px; display: flex; align-items: center; justify-content: center; }
+        .avatar-orb {
+            width: 120px; height: 120px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--purple), #3B2A80, var(--gold));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 48px; position: relative; z-index: 2;
+            box-shadow: 0 0 40px rgba(109,79,194,0.4), 0 0 80px rgba(201,168,76,0.15);
+            animation: orbFloat 4s ease-in-out infinite;
+        }
+        @keyframes orbFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+        /* Ring waves */
+        .orb-ring {
+            position: absolute; border-radius: 50%;
+            border: 1.5px solid rgba(201,168,76,0.25);
+            animation: ringExpand 2.4s ease-out infinite;
+        }
+        .orb-ring:nth-child(1) { width: 140px; height: 140px; animation-delay: 0s; }
+        .orb-ring:nth-child(2) { width: 160px; height: 160px; animation-delay: 0.8s; }
+        .orb-ring:nth-child(3) { width: 180px; height: 180px; animation-delay: 1.6s; }
+        @keyframes ringExpand { 0% { opacity: 0.6; transform: scale(0.85); } 100% { opacity: 0; transform: scale(1.15); } }
+
+        /* Speaking wave bars */
+        .voice-wave { display: flex; gap: 4px; align-items: center; height: 36px; }
+        .wave-bar {
+            width: 4px; border-radius: 4px;
+            background: linear-gradient(to top, var(--purple), var(--gold));
+            animation: waveBounce 0.8s ease-in-out infinite alternate;
+            min-height: 6px;
+        }
+        .wave-bar:nth-child(1) { animation-delay: 0.0s; }
+        .wave-bar:nth-child(2) { animation-delay: 0.1s; }
+        .wave-bar:nth-child(3) { animation-delay: 0.2s; }
+        .wave-bar:nth-child(4) { animation-delay: 0.3s; }
+        .wave-bar:nth-child(5) { animation-delay: 0.2s; }
+        .wave-bar:nth-child(6) { animation-delay: 0.1s; }
+        .wave-bar:nth-child(7) { animation-delay: 0.0s; }
+        @keyframes waveBounce { from { height: 6px; } to { height: 32px; } }
+        .voice-wave.idle .wave-bar { animation: none; height: 6px; }
+        .voice-wave.listening .wave-bar { background: linear-gradient(to top, #4ADE80, #22D3EE); }
+
+        .voice-status-label { font-size: 13px; color: var(--text-secondary); font-weight: 500; letter-spacing: 0.3px; }
+        .voice-transcript { font-size: 14px; color: var(--text-primary); min-height: 22px; text-align: center; font-style: italic; opacity: 0.8; }
+
+        .voice-controls { display: flex; gap: 12px; align-items: center; }
+        .voice-hold-btn {
+            padding: 14px 32px; border: none; border-radius: 50px;
+            background: linear-gradient(135deg, #4ADE80, #22C55E);
+            color: #050505; font-size: 14px; font-weight: 700;
+            cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .voice-hold-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(74,222,128,0.35); }
+        .voice-hold-btn.active { background: linear-gradient(135deg, #EF4444, #DC2626); color: #fff; animation: micPulse 1s ease infinite; }
+        .voice-close-btn { padding: 14px 20px; border: 1px solid var(--border); border-radius: 50px; background: transparent; color: var(--text-secondary); font-size: 14px; font-weight: 500; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; }
+        .voice-close-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+        /* ── HOW IT WORKS ── */
+        .how-section { padding: 110px 40px; background: var(--bg-secondary); border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle); }
+        .steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; max-width: 1020px; margin: 0 auto; }
+        .step-card { padding: 36px 28px; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 22px; text-align: center; position: relative; overflow: hidden; transition: all 0.3s; }
+        .step-card:hover { border-color: rgba(201,168,76,0.22); transform: translateY(-5px); box-shadow: var(--shadow); }
+        .step-card::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--gold), var(--purple)); transform: scaleX(0); transform-origin: left; transition: transform 0.3s; }
+        .step-card:hover::after { transform: scaleX(1); }
+        .step-num { font-family: 'Playfair Display', serif; font-size: 72px; font-weight: 700; color: rgba(255,255,255,0.05); line-height: 1; margin-bottom: 12px; }
+        .step-icon { font-size: 38px; margin-bottom: 16px; }
+        .step-title { font-size: 17px; font-weight: 600; margin-bottom: 10px; }
+        .step-desc { font-size: 13.5px; color: var(--text-secondary); line-height: 1.65; }
+
+        /* ── CATEGORIES ── */
+        .categories-section { padding: 110px 40px; }
+        .cats-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; max-width: 1140px; margin: 0 auto; }
+        .cat-card { padding: 28px 12px; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 16px; text-align: center; cursor: pointer; transition: all 0.25s; }
+        .cat-card:hover { border-color: var(--border); background: var(--bg-card-hover); transform: translateY(-4px); box-shadow: 0 8px 30px rgba(0,0,0,0.35); }
+        .cat-icon { font-size: 30px; margin-bottom: 9px; }
+        .cat-name { font-size: 12px; font-weight: 500; color: var(--text-secondary); }
+
+        /* ── TESTIMONIALS ── */
+        .testimonials-section { padding: 110px 40px; background: var(--bg-secondary); border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle); }
+        .test-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; max-width: 1080px; margin: 0 auto; }
+        .test-card { padding: 28px 26px; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 20px; transition: all 0.25s; }
+        .test-card:hover { border-color: rgba(201,168,76,0.2); transform: translateY(-4px); box-shadow: var(--shadow); }
+        .test-stars { display: flex; gap: 3px; margin-bottom: 16px; font-size: 13px; }
+        .test-text { font-size: 13.5px; color: var(--text-secondary); line-height: 1.75; margin-bottom: 22px; font-style: italic; }
+        .test-author { display: flex; align-items: center; gap: 12px; }
+        .test-avatar { width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, var(--purple), var(--gold)); display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; color: #fff; }
+        .test-name { font-size: 13.5px; font-weight: 600; }
+        .test-role { font-size: 11.5px; color: var(--text-muted); margin-top: 1px; }
+
+        /* ── FEATURES GRID ── */
+        .features-section { padding: 110px 40px; }
+        .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 1080px; margin: 0 auto; }
+        .feature-card { padding: 30px 26px; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 20px; transition: all 0.25s; }
+        .feature-card:hover { border-color: var(--border); transform: translateY(-3px); }
+        .feature-icon { width: 48px; height: 48px; border-radius: 12px; background: var(--gold-dim); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 18px; }
+        .feature-title { font-size: 16px; font-weight: 600; margin-bottom: 10px; }
+        .feature-desc { font-size: 13.5px; color: var(--text-secondary); line-height: 1.65; }
+
+        /* ── CTA ── */
+        .cta-section { padding: 130px 40px; text-align: center; position: relative; overflow: hidden; }
+        .cta-glow { position: absolute; inset: 0; background: radial-gradient(ellipse 70% 70% at 50% 50%, rgba(109,79,194,0.1) 0%, transparent 70%); }
+        .cta-section h2 { font-family: 'Playfair Display', serif; font-size: clamp(34px, 5.5vw, 60px); font-weight: 700; margin-bottom: 18px; position: relative; }
+        .cta-section p { font-size: 18px; color: var(--text-secondary); margin-bottom: 44px; max-width: 480px; margin-left: auto; margin-right: auto; position: relative; line-height: 1.65; }
+        .btn-xl { padding: 16px 42px; font-size: 16px; border-radius: 14px; position: relative; }
+
+        /* ── FOOTER ── */
+        footer { background: var(--bg-secondary); border-top: 1px solid var(--border-subtle); padding: 64px 60px 32px; }
+        .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; margin-bottom: 52px; }
+        .footer-brand p { font-size: 13.5px; color: var(--text-muted); line-height: 1.75; margin-top: 16px; max-width: 260px; }
+        .footer-social { display: flex; gap: 10px; margin-top: 20px; }
+        .social-btn { width: 36px; height: 36px; border: 1px solid var(--border-subtle); border-radius: 9px; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all 0.2s; text-decoration: none; color: var(--text-muted); }
+        .social-btn:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
+        .footer-col h4 { font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 18px; }
+        .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 11px; }
+        .footer-col a { text-decoration: none; font-size: 13.5px; color: var(--text-muted); transition: color 0.2s; }
+        .footer-col a:hover { color: var(--gold); }
+        .footer-bottom { border-top: 1px solid var(--border-subtle); padding-top: 28px; display: flex; align-items: center; justify-content: space-between; }
+        .footer-bottom p { font-size: 12.5px; color: var(--text-muted); }
+        .footer-bottom span { color: var(--gold); }
+
+        .reveal { opacity: 0; transform: translateY(22px); transition: opacity 0.55s ease, transform 0.55s ease; }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+    </style>
+</head>
+<body>
+
+<!-- ── VOICE AVATAR MODAL ── -->
+<div class="voice-modal" id="voiceModal">
+    <div class="voice-modal-inner">
+        <button class="voice-modal-close" onclick="closeVoiceModal()">✕</button>
+
+        <div class="avatar-orb-wrap">
+            <div class="orb-ring"></div>
+            <div class="orb-ring"></div>
+            <div class="orb-ring"></div>
+            <div class="avatar-orb" id="modalOrb">✦</div>
+        </div>
+
+        <div class="voice-wave idle" id="voiceWave">
+            <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+            <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+        </div>
+
+        <div class="voice-status-label" id="voiceStatusLabel">Press &amp; hold to speak</div>
+        <div class="voice-transcript" id="voiceTranscript"></div>
+
+        <div class="voice-controls">
+            <button class="voice-hold-btn" id="voiceHoldBtn"
+                onmousedown="startListening()" onmouseup="stopListening()"
+                ontouchstart="startListening()" ontouchend="stopListening()">
+                🎙 Hold to Speak
+            </button>
+            <button class="voice-close-btn" onclick="closeVoiceModal()">Done</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── NAVIGATION ── -->
+<nav>
+    <a href="#" class="nav-logo">
+        <div class="logo-icon">✦</div>
+        <span class="logo-text">Sice<span>ro</span></span>
+    </a>
+    <ul class="nav-links">
+        <li><a href="#how">How It Works</a></li>
+        <li><a href="#categories">Categories</a></li>
+        <li><a href="#marketplace">Marketplace</a></li>
+        <li><a href="#testimonials">Reviews</a></li>
+    </ul>
+    <div class="nav-cta">
+        <button class="btn-ghost">Sign In</button>
+        <button class="btn-gold">Get Started →</button>
+    </div>
+</nav>
+
+<!-- ── HERO ── -->
+<section class="hero">
+    <div class="hero-bg"></div>
+
+    <div class="hero-badge">
+        <div class="badge-dot"></div>
+        AI-Powered · No More Endless Scrolling
+    </div>
+
+    <h1>
+        The Marketplace<br>
+        That <span class="grad-text">Listens to You</span>
+    </h1>
+
+    <p>
+        Describe exactly what you need — budget, style, specs, vibes — and our AI concierge surfaces the perfect products and services in seconds.
+    </p>
+
+    <div class="hero-actions">
+        <button class="btn-gold btn-hero" onclick="goSection('#marketplace')">
+            Start Searching Free
+        </button>
+        <button class="btn-ghost btn-hero" onclick="goSection('#how')">
+            See How It Works
+        </button>
+    </div>
+
+    <div class="hero-scroll">
+        <div class="scroll-line"></div>
+        <span class="scroll-label">Scroll to explore</span>
+    </div>
+</section>
+
+<!-- ── TRUST BAR ── -->
+<div class="trust-bar">
+    <div class="trust-item"><div class="trust-number">2.4M+</div><div class="trust-label">Products Listed</div></div>
+    <div class="trust-divider"></div>
+    <div class="trust-item"><div class="trust-number">98%</div><div class="trust-label">Match Accuracy</div></div>
+    <div class="trust-divider"></div>
+    <div class="trust-item"><div class="trust-number">320K</div><div class="trust-label">Active Shoppers</div></div>
+    <div class="trust-divider"></div>
+    <div class="trust-item"><div class="trust-number">4.9★</div><div class="trust-label">Avg. Rating</div></div>
+    <div class="trust-divider"></div>
+    <div class="trust-item"><div class="trust-number">42s</div><div class="trust-label">Avg. Find Time</div></div>
+</div>
+
+<!-- ── MARKETPLACE ── -->
+<section class="marketplace" id="marketplace">
+    <div class="section-head reveal">
+        <div class="section-label">Live Demo</div>
+        <h2 class="section-title">Talk to <span class="grad-text">Sicero</span></h2>
+        <p class="section-sub">Describe exactly what you want. Our AI listens, understands context, and delivers handpicked results instantly.</p>
+    </div>
+
+    <div class="chat-app">
+        <!-- Chat Panel -->
+        <div class="chat-panel">
+            <div class="panel-header">
+                <div class="agent-pill">
+                    <div class="agent-avatar-wrap" onclick="openVoiceModal()" title="Open voice mode">
+                        <div class="avatar-ring"></div>
+                        <div class="agent-avatar" id="headerAvatar">✦</div>
+                    </div>
+                    <div>
+                        <div class="agent-name">Sicero AI Concierge</div>
+                        <div class="agent-status">
+                            <div class="status-dot"></div>
+                            Online · Ready to assist
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-actions">
+                    <button class="icon-btn" title="Voice mode" onclick="openVoiceModal()">🎙</button>
+                    <button class="icon-btn" title="Clear chat" onclick="clearChat()">↺</button>
+                </div>
+            </div>
+
+            <div class="chat-messages" id="chatMessages">
+                <div class="message ai">
+                    <div class="msg-avatar ai">✦</div>
+                    <div class="msg-wrap">
+                        <div class="msg-bubble">
+                            Welcome — I'm <strong>Sicero</strong>, your personal shopping concierge. 👋<br><br>
+                            Tell me what you're looking for and I'll surface the best matches right away. You can also tap the avatar or 🎙 to use your voice!
+                        </div>
+                        <div class="msg-time">Just now</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="suggestions">
+                <button class="chip" onclick="sendChip(this.textContent)">🎧 Wireless headphones under $200</button>
+                <button class="chip" onclick="sendChip(this.textContent)">💻 Laptop for video editing</button>
+                <button class="chip" onclick="sendChip(this.textContent)">🌿 Organic skincare routine</button>
+                <button class="chip" onclick="sendChip(this.textContent)">🏃 Running shoes for flat feet</button>
+                <button class="chip" onclick="sendChip(this.textContent)">🎮 Gaming setup under $1500</button>
+                <button class="chip" onclick="sendChip(this.textContent)">✈️ Travel backpack carry-on</button>
+            </div>
+
+            <div class="chat-footer">
+                <textarea
+                    class="chat-input"
+                    id="chatInput"
+                    placeholder="Describe what you're looking for..."
+                    rows="1"
+                    onkeydown="handleKey(event)"
+                    oninput="autoResize(this)"
+                ></textarea>
+                <button class="mic-btn" id="micBtn" onclick="toggleMicInline()" title="Voice input">🎙</button>
+                <button class="send-btn" onclick="sendMessage()">
+                    <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Results Panel -->
+        <div class="results-panel">
+            <div class="panel-header">
+                <div class="results-header-row">
+                    <div class="results-title-wrap">
+                        <span class="results-title">Curated Results</span>
+                        <span class="count-badge" id="resultsCount">0 found</span>
+                    </div>
+                    <div class="filter-row">
+                        <button class="f-chip on" onclick="setFilter(this)">All</button>
+                        <button class="f-chip" onclick="setFilter(this)">Top Match</button>
+                        <button class="f-chip" onclick="setFilter(this)">Price ↑</button>
+                    </div>
+                </div>
+            </div>
+            <div class="results-body" id="resultsBody">
+                <div class="empty-state" id="emptyState">
+                    <div class="empty-icon">✦</div>
+                    <h3>Start a conversation</h3>
+                    <p>Your curated product recommendations will appear here as you chat.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── HOW IT WORKS ── -->
+<section class="how-section" id="how">
+    <div class="section-head reveal">
+        <div class="section-label">The Process</div>
+        <h2 class="section-title">Shopping, <span class="grad-text">Reimagined</span></h2>
+        <p class="section-sub">No more endless scrolling through irrelevant results. Just natural conversation and pinpoint accuracy.</p>
+    </div>
+    <div class="steps-grid">
+        <div class="step-card reveal">
+            <div class="step-num">01</div>
+            <div class="step-icon">💬</div>
+            <div class="step-title">Describe Your Need</div>
+            <div class="step-desc">Talk to Sicero like a trusted friend — by text or voice. Share requirements, budget, style, and deal-breakers in plain language.</div>
+        </div>
+        <div class="step-card reveal" style="transition-delay:0.1s">
+            <div class="step-num">02</div>
+            <div class="step-icon">🧠</div>
+            <div class="step-title">AI Searches Instantly</div>
+            <div class="step-desc">Our AI extracts key filters from your message and searches 2.4M+ listings in real-time — no clarifying questions, just instant results.</div>
+        </div>
+        <div class="step-card reveal" style="transition-delay:0.2s">
+            <div class="step-num">03</div>
+            <div class="step-icon">✦</div>
+            <div class="step-title">Receive Perfect Matches</div>
+            <div class="step-desc">Get handpicked recommendations with match scores, transparent reasoning, and one-click purchasing — all in under a minute.</div>
+        </div>
+    </div>
+</section>
+
+<!-- ── FEATURES ── -->
+<section class="features-section">
+    <div class="section-head reveal">
+        <div class="section-label">Why Sicero</div>
+        <h2 class="section-title">Built for the Way <span class="grad-text">You Think</span></h2>
+        <p class="section-sub">Every feature is designed to make discovery effortless and purchasing confident.</p>
+    </div>
+    <div class="features-grid section-wrap">
+        <div class="feature-card reveal"><div class="feature-icon">🎯</div><div class="feature-title">Precision Matching</div><div class="feature-desc">Our AI understands nuance — "gaming laptop that's quiet enough for a library" returns different results than "performance gaming laptop."</div></div>
+        <div class="feature-card reveal" style="transition-delay:0.08s"><div class="feature-icon">🎙</div><div class="feature-title">Voice Conversations</div><div class="feature-desc">Talk to Sicero hands-free. Our AI avatar listens to your voice, understands your needs, and speaks results back to you naturally.</div></div>
+        <div class="feature-card reveal" style="transition-delay:0.16s"><div class="feature-icon">🛡️</div><div class="feature-title">Verified Sellers Only</div><div class="feature-desc">Every seller on Sicero is vetted. No counterfeits, no hidden fees. We surface only trusted vendors with proven track records.</div></div>
+        <div class="feature-card reveal" style="transition-delay:0.08s"><div class="feature-icon">⚡</div><div class="feature-title">Instant Results</div><div class="feature-desc">Results appear the moment you send your message. No clarifying questions, no waiting — just immediate, ranked recommendations.</div></div>
+        <div class="feature-card reveal" style="transition-delay:0.16s"><div class="feature-icon">💡</div><div class="feature-title">Context Awareness</div><div class="feature-desc">Sicero remembers what you said earlier in the conversation. Refine, compare, and build on previous searches seamlessly.</div></div>
+        <div class="feature-card reveal" style="transition-delay:0.24s"><div class="feature-icon">🌐</div><div class="feature-title">Goods & Services</div><div class="feature-desc">Physical products, digital goods, freelance services, SaaS subscriptions — Sicero covers every category in one unified interface.</div></div>
+    </div>
+</section>
+
+<!-- ── CATEGORIES ── -->
+<section class="categories-section" id="categories">
+    <div class="section-head reveal">
+        <div class="section-label">Browse by Category</div>
+        <h2 class="section-title">Everything You <span class="grad-text">Could Need</span></h2>
+        <p class="section-sub">From cutting-edge tech to everyday essentials, Sicero has every category covered.</p>
+    </div>
+    <div class="cats-grid section-wrap">
+        <div class="cat-card reveal" onclick="sendChip('Looking for electronics and gadgets')"><div class="cat-icon">💻</div><div class="cat-name">Electronics</div></div>
+        <div class="cat-card reveal" onclick="sendChip('Show me fashion and clothing')"><div class="cat-icon">👗</div><div class="cat-name">Fashion</div></div>
+        <div class="cat-card reveal" onclick="sendChip('Looking for home and living products')"><div class="cat-icon">🏠</div><div class="cat-name">Home & Living</div></div>
+        <div class="cat-card reveal" onclick="sendChip('Find me fitness and health gear')"><div class="cat-icon">💪</div><div class="cat-name">Health & Fitness</div></div>
+        <div class="cat-card reveal" onclick="sendChip('Recommend beauty and skincare products')"><div class="cat-icon">✨</div><div class="cat-name">Beauty</div></div>
+        <div class="cat-card reveal" onclick="sendChip('Looking for travel bags and accessories')"><div class="cat-icon">✈️</div><div class="cat-name">Travel</div></div>
+        <div class="cat-card reveal" onclick="sendChip('Find gaming gear and accessories')"><div class="cat-icon">🎮</div><div class="cat-name">Gaming</div></div>
+        <div class="cat-card reveal" onclick="sendChip('Books and educational resources')"><div class="cat-icon">📚</div><div class="cat-name">Books & Learning</div></div>
+        <div class="cat-card reveal" onclick="sendChip('Find pet supplies')"><div class="cat-icon">🐾</div><div class="cat-name">Pets</div></div>
+        <div class="cat-card reveal" onclick="sendChip('Food and gourmet products')"><div class="cat-icon">🍷</div><div class="cat-name">Food & Drink</div></div>
+        <div class="cat-card reveal" onclick="sendChip('Outdoor and sports equipment')"><div class="cat-icon">🏕️</div><div class="cat-name">Outdoor & Sports</div></div>
+        <div class="cat-card reveal" onclick="sendChip('Professional services and SaaS tools')"><div class="cat-icon">💼</div><div class="cat-name">Services</div></div>
+    </div>
+</section>
+
+<!-- ── TESTIMONIALS ── -->
+<section class="testimonials-section" id="testimonials">
+    <div class="section-head reveal">
+        <div class="section-label">Testimonials</div>
+        <h2 class="section-title">Loved by <span class="grad-text">Thousands</span></h2>
+        <p class="section-sub">Real people. Real results. See what the Sicero community is saying.</p>
+    </div>
+    <div class="test-grid">
+        <div class="test-card reveal">
+            <div class="test-stars">⭐⭐⭐⭐⭐</div>
+            <p class="test-text">"I told Sicero I needed a laptop for 3D animation under $1,500 that stays cool under load. Within seconds — five perfect options ranked by match score. No more hours of research. This is the future."</p>
+            <div class="test-author"><div class="test-avatar">J</div><div><div class="test-name">James Nakamura</div><div class="test-role">3D Artist · Tokyo, Japan</div></div></div>
+        </div>
+        <div class="test-card reveal" style="transition-delay:0.1s">
+            <div class="test-stars">⭐⭐⭐⭐⭐</div>
+            <p class="test-text">"I used the voice feature and just talked to Sicero like a friend. It found exactly what I was looking for without me typing a single word. The AI avatar even talked back. Absolutely mind-blowing."</p>
+            <div class="test-author"><div class="test-avatar">S</div><div><div class="test-name">Sofia Andersson</div><div class="test-role">Nutritionist · Stockholm, Sweden</div></div></div>
+        </div>
+        <div class="test-card reveal" style="transition-delay:0.2s">
+            <div class="test-stars">⭐⭐⭐⭐⭐</div>
+            <p class="test-text">"Running a B2B business means niche sourcing. Sicero understood my requirements instantly and connected me with vendors I'd never have found otherwise. Saved me literal weeks of searching."</p>
+            <div class="test-author"><div class="test-avatar">M</div><div><div class="test-name">Marcus Webb</div><div class="test-role">Founder · Austin, TX</div></div></div>
+        </div>
+    </div>
+</section>
+
+<!-- ── CTA ── -->
+<section class="cta-section">
+    <div class="cta-glow"></div>
+    <h2>Find Anything.<br><span class="grad-text">Instantly.</span></h2>
+    <p>Join 320,000+ smart shoppers who've discovered a better way to buy exactly what they need.</p>
+    <button class="btn-gold btn-xl" onclick="goSection('#marketplace')">Try Sicero — It's Free</button>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+    <div class="footer-grid">
+        <div class="footer-brand">
+            <a href="#" class="nav-logo">
+                <div class="logo-icon">✦</div>
+                <span class="logo-text">Sice<span>ro</span></span>
+            </a>
+            <p>The world's first AI-powered conversational marketplace. Find anything, fast — just by talking.</p>
+            <div class="footer-social">
+                <a class="social-btn" href="#" title="Twitter">𝕏</a>
+                <a class="social-btn" href="#" title="LinkedIn">in</a>
+                <a class="social-btn" href="#" title="Instagram">ig</a>
+                <a class="social-btn" href="#" title="GitHub">gh</a>
+            </div>
+        </div>
+        <div class="footer-col"><h4>Product</h4><ul><li><a href="#">Features</a></li><li><a href="#">Pricing</a></li><li><a href="#">API Access</a></li><li><a href="#">Integrations</a></li><li><a href="#">Changelog</a></li></ul></div>
+        <div class="footer-col"><h4>Company</h4><ul><li><a href="#">About Us</a></li><li><a href="#">Blog</a></li><li><a href="#">Careers</a></li><li><a href="#">Press Kit</a></li><li><a href="#">Contact</a></li></ul></div>
+        <div class="footer-col"><h4>Legal</h4><ul><li><a href="#">Privacy Policy</a></li><li><a href="#">Terms of Service</a></li><li><a href="#">Cookie Policy</a></li><li><a href="#">Security</a></li><li><a href="#">Compliance</a></li></ul></div>
+    </div>
+    <div class="footer-bottom">
+        <p>© 2026 Sicero Inc. All rights reserved.</p>
+        <p>Built with <span>✦</span> and intelligence</p>
+    </div>
+</footer>
+
+<script>
+// ──────────────────────────────────────────────
+// NAVIGATION FIX — renamed from scrollTo (conflicts with native browser API)
+// ──────────────────────────────────────────────
+function goSection(id) {
+    const el = document.querySelector(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+}
+
+// ──────────────────────────────────────────────
+// PRODUCT DATABASE
+// ──────────────────────────────────────────────
+const DB = {
+    headphones: [
+        { name: "Sony WH-1000XM5", cat: "Audio", desc: "Industry-leading noise canceling, 30hr battery, Hi-Res audio. The gold standard of wireless headphones.", price: "$349", rating: "4.8", reviews: "12.4k", match: "98%", icon: "🎧" },
+        { name: "Bose QuietComfort 45", cat: "Audio", desc: "Acclaimed comfort with world-class ANC. Ideal for travel, WFH, and long listening sessions.", price: "$279", rating: "4.7", reviews: "9.2k", match: "95%", icon: "🎧" },
+        { name: "Apple AirPods Max", cat: "Audio", desc: "Premium over-ear headphones with Apple chip, Spatial Audio, and breathtaking aluminum build.", price: "$449", rating: "4.6", reviews: "8.1k", match: "91%", icon: "🎧" },
+        { name: "Jabra Evolve2 85", cat: "Audio", desc: "Professional-grade headset with dual mic array, Busylight, and all-day ergonomic comfort.", price: "$379", rating: "4.5", reviews: "3.8k", match: "87%", icon: "🎧" },
+    ],
+    laptops: [
+        { name: "MacBook Pro 14\" M3 Pro", cat: "Computing", desc: "ProRes-accelerated video editing, 22hr battery, and a Liquid Retina XDR display. Creator's benchmark.", price: "$1,999", rating: "4.9", reviews: "15.1k", match: "99%", icon: "💻" },
+        { name: "ASUS ProArt Studiobook 16", cat: "Computing", desc: "OLED display, RTX 4070, 64GB RAM. Designed for the most demanding creative workflows.", price: "$2,299", rating: "4.7", reviews: "4.3k", match: "96%", icon: "💻" },
+        { name: "Dell XPS 15", cat: "Computing", desc: "Premium InfinityEdge OLED display, Core i9, and a beautifully thin chassis for creators on the go.", price: "$1,799", rating: "4.6", reviews: "6.7k", match: "92%", icon: "💻" },
+        { name: "Razer Blade 15 Studio", cat: "Computing", desc: "RTX 4080, 240Hz QHD display, CNC aluminum body. Built for creators who demand gamer-grade specs.", price: "$2,499", rating: "4.5", reviews: "3.1k", match: "89%", icon: "💻" },
+    ],
+    skincare: [
+        { name: "The Ordinary Niacinamide 10%", cat: "Beauty", desc: "Reduces blemishes, congestion, and pores. Vegan, cruelty-free. One of the most loved serums globally.", price: "$6", rating: "4.8", reviews: "52k", match: "97%", icon: "🌿" },
+        { name: "Cetaphil Gentle Cleanser", cat: "Beauty", desc: "Fragrance-free, dermatologist recommended. Gentle daily cleanser that won't strip your skin barrier.", price: "$14", rating: "4.7", reviews: "34k", match: "94%", icon: "💧" },
+        { name: "La Roche-Posay SPF 50+", cat: "Beauty", desc: "Ultra-light daily moisturizer with broad-spectrum protection. Beloved by dermatologists worldwide.", price: "$38", rating: "4.8", reviews: "21k", match: "93%", icon: "🌿" },
+        { name: "CeraVe Moisturizing Cream", cat: "Beauty", desc: "24-hour hydration with ceramides and hyaluronic acid. The holy grail for dry and sensitive skin types.", price: "$19", rating: "4.9", reviews: "89k", match: "91%", icon: "✨" },
+    ],
+    running: [
+        { name: "Brooks Adrenaline GTS 23", cat: "Footwear", desc: "Award-winning stability with GuideRails® tech — engineered specifically for overpronation and flat arches.", price: "$140", rating: "4.8", reviews: "22k", match: "99%", icon: "👟" },
+        { name: "ASICS Gel-Kayano 30", cat: "Footwear", desc: "Maximum stability, LYTE TRUSSTIC tech, and deep cushioning. The definitive flat-foot running shoe.", price: "$160", rating: "4.7", reviews: "18k", match: "97%", icon: "👟" },
+        { name: "New Balance 860v13", cat: "Footwear", desc: "Motion control with ROLLBAR® stability post. Ideal for moderate to severe overpronation.", price: "$135", rating: "4.6", reviews: "9.4k", match: "94%", icon: "👟" },
+        { name: "Saucony Guide 16", cat: "Footwear", desc: "Lightweight PWRRUN cushioning with medial post. Stable, fast, and comfortable for daily training.", price: "$130", rating: "4.5", reviews: "7.8k", match: "90%", icon: "👟" },
+    ],
+    gaming: [
+        { name: "ASUS ROG Strix G15", cat: "Gaming", desc: "AMD Advantage Edition: RX 6800M, 300Hz display, MUX Switch. Uncompromising performance.", price: "$1,299", rating: "4.7", reviews: "5.6k", match: "96%", icon: "🎮" },
+        { name: "Razer DeathAdder V3 Pro", cat: "Gaming", desc: "Ultra-lightweight wireless mouse with Focus Pro 30K sensor and 90hr battery life.", price: "$159", rating: "4.8", reviews: "11k", match: "94%", icon: "🖱️" },
+        { name: "SteelSeries Arctis Nova Pro", cat: "Gaming", desc: "Multi-system wireless audio with hot-swap battery, ANC, and audiophile-grade drivers.", price: "$349", rating: "4.6", reviews: "7.2k", match: "91%", icon: "🎧" },
+        { name: "LG C3 OLED 27\" Monitor", cat: "Gaming", desc: "Cinematic OLED gaming with 0.1ms response, 240Hz, G-Sync compatible. Console and PC ready.", price: "$999", rating: "4.9", reviews: "14k", match: "88%", icon: "🖥️" },
+    ],
+    electronics: [
+        { name: "iPad Pro 13\" M4", cat: "Tablet", desc: "Tandem OLED display, M4 chip, and Apple Pencil Pro support. The most capable tablet ever built.", price: "$1,299", rating: "4.9", reviews: "23k", match: "97%", icon: "📱" },
+        { name: "Samsung Galaxy Tab S9 Ultra", cat: "Tablet", desc: "14.6\" AMOLED display, S Pen included, DeX mode for full desktop-class productivity on the go.", price: "$1,199", rating: "4.7", reviews: "14k", match: "93%", icon: "📱" },
+        { name: "Anker 140W GaN Charger", cat: "Accessories", desc: "Compact 3-port GaN charger powers your laptop, phone, and earbuds simultaneously. Travel-sized.", price: "$55", rating: "4.8", reviews: "67k", match: "88%", icon: "🔌" },
+    ],
+    home: [
+        { name: "Dyson V15 Detect", cat: "Home Appliance", desc: "Laser reveals invisible dust. Powerful suction, HEPA filtration, and 60-min runtime.", price: "$749", rating: "4.8", reviews: "31k", match: "96%", icon: "🏠" },
+        { name: "Philips Hue Starter Kit", cat: "Smart Home", desc: "16M colors, smart scenes, Alexa & Google integration. Transform any room with intelligent light.", price: "$199", rating: "4.7", reviews: "44k", match: "92%", icon: "💡" },
+        { name: "Nest Learning Thermostat", cat: "Smart Home", desc: "Learns your schedule and programs itself. Save up to 15% on cooling and 12% on heating bills.", price: "$249", rating: "4.6", reviews: "52k", match: "89%", icon: "🌡️" },
+    ],
+    travel: [
+        { name: "Away Bigger Carry-On", cat: "Luggage", desc: "Polycarbonate shell, 360° spinner wheels, TSA lock, and ejectable USB-C charger.", price: "$325", rating: "4.7", reviews: "18k", match: "95%", icon: "✈️" },
+        { name: "Osprey Farpoint 40", cat: "Backpack", desc: "Award-winning travel pack with LightWire frame, fits carry-on requirements for most airlines.", price: "$200", rating: "4.8", reviews: "9.7k", match: "92%", icon: "🎒" },
+        { name: "Bellroy Travel Wallet", cat: "Accessories", desc: "Slim RFID-protected wallet holds 16 cards, passport, boarding pass, and cash.", price: "$90", rating: "4.6", reviews: "14k", match: "87%", icon: "💳" },
+    ],
+    fitness: [
+        { name: "WHOOP 4.0", cat: "Wearable", desc: "24/7 strain, recovery, and sleep coaching. No screen — just pure behavioral data to optimize performance.", price: "$239", rating: "4.6", reviews: "28k", match: "94%", icon: "⌚" },
+        { name: "Manduka PRO Yoga Mat", cat: "Fitness", desc: "Lifetime guarantee, superior cushioning, and closed-cell surface that prevents bacteria build-up.", price: "$128", rating: "4.8", reviews: "15k", match: "91%", icon: "🧘" },
+        { name: "Bowflex SelectTech 552", cat: "Fitness", desc: "Replaces 15 sets of dumbbells. Dial weights from 5–52.5 lbs. The smartest home gym investment.", price: "$429", rating: "4.7", reviews: "43k", match: "88%", icon: "💪" },
+    ],
+    services: [
+        { name: "Fiverr Pro — Brand Design", cat: "Service", desc: "Vetted pro freelancers for logo, brand identity, and strategy. Money-back guarantee on every project.", price: "From $500", rating: "4.8", reviews: "8.3k", match: "96%", icon: "🎨" },
+        { name: "Notion Teams", cat: "SaaS", desc: "All-in-one workspace for docs, wikis, databases, and projects. Scales with startups and enterprises.", price: "$16/mo", rating: "4.7", reviews: "51k", match: "91%", icon: "📋" },
+        { name: "Wix Studio Plan", cat: "SaaS", desc: "Advanced website builder for agencies with team collaboration, custom code, and client management.", price: "$36/mo", rating: "4.5", reviews: "22k", match: "87%", icon: "🌐" },
+    ],
+    fashion: [
+        { name: "Everlane Premium-Wash Jean", cat: "Fashion", desc: "Japanese selvedge denim, ethically made. Slim taper cut in a premium-wash indigo.", price: "$98", rating: "4.6", reviews: "8.2k", match: "95%", icon: "👖" },
+        { name: "Allbirds Wool Runners", cat: "Fashion", desc: "The world's most comfortable sneaker. Natural merino wool upper, carbon-neutral certified.", price: "$130", rating: "4.7", reviews: "22k", match: "92%", icon: "👟" },
+        { name: "Patagonia Better Sweater", cat: "Fashion", desc: "Recycled fleece with heritage styling. The iconic everyday layering piece.", price: "$149", rating: "4.8", reviews: "31k", match: "89%", icon: "🧥" },
+    ],
+    pets: [
+        { name: "Furbo 360° Dog Camera", cat: "Pets", desc: "360° rotating camera with treat toss, barking alert, and 2-way audio. Monitor your pet anywhere.", price: "$229", rating: "4.6", reviews: "18k", match: "95%", icon: "🐾" },
+        { name: "Orijen Original Dog Food", cat: "Pets", desc: "Biologically appropriate dog food with 85% quality animal ingredients. Zero grain formula.", price: "$94", rating: "4.8", reviews: "11k", match: "92%", icon: "🐕" },
+        { name: "PetSafe Automatic Feeder", cat: "Pets", desc: "Programmable 5-meal automatic feeder. Portion control, slow feed mode, and BPA-free.", price: "$65", rating: "4.5", reviews: "24k", match: "87%", icon: "🐾" },
+    ],
+    food: [
+        { name: "Trade Coffee Subscription", cat: "Food & Drink", desc: "Personalized specialty coffee subscription. Roasted to order, sourced from top farms worldwide.", price: "$19/mo", rating: "4.7", reviews: "14k", match: "96%", icon: "☕" },
+        { name: "Brightland Alive Olive Oil", cat: "Food & Drink", desc: "Award-winning California EVOO. Harvested fresh, unfiltered, and rich in antioxidants.", price: "$37", rating: "4.8", reviews: "6.2k", match: "91%", icon: "🫒" },
+        { name: "Magic Spoon Cereal", cat: "Food & Drink", desc: "High-protein, zero sugar cereal. 13g protein, 4g net carbs, and genuinely delicious.", price: "$40", rating: "4.5", reviews: "32k", match: "87%", icon: "🥣" },
+    ],
+    outdoor: [
+        { name: "Yeti Tundra 45 Cooler", cat: "Outdoor", desc: "Rotomolded construction keeps ice for days. Bear-resistant certified, virtually indestructible.", price: "$350", rating: "4.8", reviews: "42k", match: "96%", icon: "🏕️" },
+        { name: "Black Diamond Spot 400 Headlamp", cat: "Outdoor", desc: "400-lumen headlamp with waterproof rating and 200hr battery life. The trail standard.", price: "$45", rating: "4.7", reviews: "19k", match: "93%", icon: "🔦" },
+        { name: "Hydro Flask 32oz Water Bottle", cat: "Outdoor", desc: "TempShield double-wall insulation. Keeps drinks cold 24hrs, hot 12hrs. Lifetime warranty.", price: "$45", rating: "4.9", reviews: "88k", match: "89%", icon: "💧" },
+    ],
+};
+
+// ──────────────────────────────────────────────
+// AI RESPONSE ENGINE — results shown IMMEDIATELY, no clarifying questions first
+// ──────────────────────────────────────────────
+const responses = [
+    { kw: ["headphone","audio","wireless","earphone","earbuds","music","noise cancel","speaker"], reply: (m) => { const b = budget(m); return `Found ${b ? `top picks within $${b}` : "the best options"} for wireless headphones! 🎧 Ranked by noise cancellation, comfort, and value — here are your matches:`; }, db: "headphones" },
+    { kw: ["laptop","computer","video edit","macbook","pc","notebook","rendering","blender","premiere","creative","animation","3d"], reply: (m) => { const b = budget(m); return `Here are the top laptops${b ? ` under $${b}` : ""} for your workflow 💻 — ranked by GPU power, display accuracy, and thermal performance:`; }, db: "laptops" },
+    { kw: ["skincare","skin","moisturizer","serum","cleanser","organic","beauty","face","routine","acne","pore"], reply: () => "Here's your curated skincare lineup ✨ — ranked by ingredient quality, dermatologist backing, and real customer results:", db: "skincare" },
+    { kw: ["running","shoe","flat feet","overpronation","sneaker","jogging","marathon","trail","foot support"], reply: () => "Top picks for flat feet and stability 👟 — every option below features medial support and motion control technology:", db: "running" },
+    { kw: ["gaming","game","fps","esport","rgb","stream","twitch","console","setup","rig"], reply: () => "Here's your curated gaming gear 🎮 — ranked by performance-per-dollar and build quality for 2026:", db: "gaming" },
+    { kw: ["electronic","tech","gadget","tablet","ipad","phone","device","charger","accessory"], reply: () => "Top-rated electronics matching your request ⚡ — pulled from our verified catalog:", db: "electronics" },
+    { kw: ["home","house","living","decor","vacuum","smart home","kitchen","furniture","clean"], reply: () => "Best home products for you 🏠 — prioritizing quality, design, and smart home compatibility:", db: "home" },
+    { kw: ["travel","luggage","bag","backpack","trip","vacation","suitcase","carry on","pack"], reply: () => "Top travel essentials ✈️ — ranked by durability, security, and smart design:", db: "travel" },
+    { kw: ["fitness","workout","gym","health","exercise","yoga","weight","dumbbell","tracker","sport"], reply: () => "Best fitness gear for your goals 💪 — curated by effectiveness and community ratings:", db: "fitness" },
+    { kw: ["service","freelancer","business","software","tool","saas","professional","agency","b2b"], reply: () => "Top-rated services and tools 💼 — matching on reliability, scalability, and value:", db: "services" },
+    { kw: ["fashion","clothing","clothes","outfit","style","wear","shirt","pants","dress","jacket"], reply: () => "Here's your curated fashion picks 👗 — trending styles meeting quality craftsmanship:", db: "fashion" },
+    { kw: ["pet","dog","cat","animal","puppy","kitten"], reply: () => "Top-rated pet products 🐾 — for happy, healthy companions:", db: "pets" },
+    { kw: ["food","drink","coffee","tea","snack","grocery","gourmet","wine","meal"], reply: () => "Best food and drink picks ☕ — curated for quality, taste, and value:", db: "food" },
+    { kw: ["outdoor","camping","hiking","trail","nature","sports","adventure","kayak","climb"], reply: () => "Top outdoor and adventure gear 🏕️ — built for the wild:", db: "outdoor" },
+];
+
+// Generic fallback that STILL shows products from a random category
+const fallbackDB = ["headphones","laptops","skincare","running","gaming"];
+const fallbackReplies = [
+    (m) => `I found some top picks across our catalog for "${m.substring(0,40)}" — here's what's trending:`,
+    (m) => `Searching for "${m.substring(0,40)}"... Here are our most popular results right now:`,
+    (m) => `Great — here are the best matches I found for your query:`,
+];
+
+let msgCount = 0;
+let lastProducts = [];
+let isSpeaking = false;
+
+function budget(msg) {
+    const m = msg.match(/\$?(\d[\d,]*)/);
+    return m ? m[1].replace(",","") : null;
+}
+
+function now() {
+    return new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
+
+function autoResize(el) {
+    el.style.height = "auto";
+    el.style.height = Math.min(el.scrollHeight, 120) + "px";
+}
+
+function handleKey(e) {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+function setFilter(btn) {
+    document.querySelectorAll(".f-chip").forEach(b => b.classList.remove("on"));
+    btn.classList.add("on");
+}
+
+function clearChat() {
+    const msgs = document.getElementById("chatMessages");
+    msgs.innerHTML = "";
+    addAI("Chat cleared. What are you looking for? I'll find it instantly!");
+    document.getElementById("emptyState").style.display = "";
+    document.querySelectorAll(".product-card, .searching-row").forEach(c => c.remove());
+    document.getElementById("resultsCount").textContent = "0 found";
+    lastProducts = [];
+    msgCount = 0;
+}
+
+function sendChip(text) {
+    document.getElementById("chatInput").value = text;
+    sendMessage();
+    goSection('#marketplace');
+}
+
+function sendMessage() {
+    const inp = document.getElementById("chatInput");
+    const txt = inp.value.trim();
+    if (!txt) return;
+    inp.value = ""; inp.style.height = "auto";
+    msgCount++;
+    addUser(txt);
+
+    // Show "searching" immediately in results
+    showSearching();
+
+    // Shorter delay for snappier feel
+    showTyping();
+    setTimeout(() => { removeTyping(); process(txt); }, 600 + Math.random() * 400);
+}
+
+function addUser(text) {
+    append(`
+        <div class="message user">
+            <div class="msg-avatar hu">You</div>
+            <div class="msg-wrap">
+                <div class="msg-bubble">${esc(text)}</div>
+                <div class="msg-time">${now()}</div>
+            </div>
+        </div>`);
+}
+
+function addAI(html, speak = false) {
+    append(`
+        <div class="message ai">
+            <div class="msg-avatar ai">✦</div>
+            <div class="msg-wrap">
+                <div class="msg-bubble">${html}</div>
+                <div class="msg-time">${now()}</div>
+            </div>
+        </div>`);
+    if (speak) speakText(html.replace(/<[^>]*>/g, ""));
+    setAvatarState("speaking");
+    setTimeout(() => setAvatarState("idle"), 1800);
+}
+
+function showTyping() {
+    const msgs = document.getElementById("chatMessages");
+    const div = document.createElement("div");
+    div.className = "message ai"; div.id = "typing";
+    div.innerHTML = `
+        <div class="msg-avatar ai">✦</div>
+        <div class="typing-indicator">
+            <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
+        </div>`;
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+}
+
+function removeTyping() {
+    const t = document.getElementById("typing");
+    if (t) t.remove();
+}
+
+function showSearching() {
+    const body = document.getElementById("resultsBody");
+    document.querySelectorAll(".product-card").forEach(c => c.remove());
+    const existing = document.getElementById("searchingRow");
+    if (existing) existing.remove();
+    const row = document.createElement("div");
+    row.className = "searching-row"; row.id = "searchingRow";
+    row.innerHTML = `<div class="search-spinner"></div><div class="searching-text">Scanning 2.4M+ products for the best matches...</div>`;
+    document.getElementById("emptyState").style.display = "none";
+    body.insertBefore(row, body.firstChild);
+}
+
+function removeSearching() {
+    const s = document.getElementById("searchingRow");
+    if (s) s.remove();
+}
+
+function append(html) {
+    const msgs = document.getElementById("chatMessages");
+    const div = document.createElement("div");
+    div.innerHTML = html;
+    msgs.appendChild(div.firstElementChild);
+    msgs.scrollTop = msgs.scrollHeight;
+}
+
+function esc(s) {
+    const d = document.createElement("div");
+    d.appendChild(document.createTextNode(s));
+    return d.innerHTML;
+}
+
+function process(msg) {
+    const lo = msg.toLowerCase();
+    let hit = null;
+    for (const r of responses) {
+        if (r.kw.some(k => lo.includes(k))) { hit = r; break; }
+    }
+
+    removeSearching();
+
+    if (hit) {
+        const reply = typeof hit.reply === "function" ? hit.reply(msg) : hit.reply;
+        addAI(reply, true);
+        const prods = DB[hit.db] || [];
+        lastProducts = prods;
+        showProducts(prods);
+    } else {
+        // Refinement check
+        const isRefine = /under|budget|cheaper|more|show|different|other|color|size|brand|better/i.test(msg);
+        if (isRefine && lastProducts.length > 0) {
+            addAI(`Updated results based on that — here are the refined picks:`, true);
+            showProducts(lastProducts.slice(0, 3), true);
+        } else {
+            // Always show SOMETHING — pick closest category
+            const fallbackKey = fallbackDB[msgCount % fallbackDB.length];
+            const fallbackReply = fallbackReplies[msgCount % fallbackReplies.length](msg);
+            addAI(fallbackReply, true);
+            const prods = DB[fallbackKey] || [];
+            lastProducts = prods;
+            showProducts(prods);
+        }
+    }
+}
+
+function showProducts(prods, refresh = false) {
+    const body = document.getElementById("resultsBody");
+    const cnt = document.getElementById("resultsCount");
+    document.getElementById("emptyState").style.display = "none";
+    if (refresh) document.querySelectorAll(".product-card").forEach(c => c.remove());
+    cnt.textContent = prods.length + " found";
+    prods.forEach((p, i) => {
+        setTimeout(() => {
+            body.appendChild(makeCard(p));
+            body.scrollTop = body.scrollHeight;
+        }, i * 90);
+    });
+}
+
+function makeCard(p) {
+    const card = document.createElement("div");
+    card.className = "product-card";
+    card.innerHTML = `
+        <div class="prod-img">${p.icon}</div>
+        <div class="prod-info">
+            <div class="prod-cat">${p.cat}</div>
+            <div class="prod-name">${p.name}</div>
+            <div class="prod-desc">${p.desc}</div>
+            <div class="prod-row">
+                <div class="prod-price">${p.price}</div>
+                <div class="prod-meta">
+                    <div class="rating"><span class="star">★</span> ${p.rating} (${p.reviews})</div>
+                    <span class="match-badge">${p.match}</span>
+                </div>
+            </div>
+            <div class="prod-btns">
+                <button class="btn-cart" onclick="addCart(this,'${esc(p.name)}')">Add to Cart</button>
+                <button class="btn-view" onclick="viewProd('${esc(p.name)}')">Details</button>
+            </div>
+        </div>`;
+    return card;
+}
+
+function addCart(btn, name) {
+    btn.textContent = "✓ Added!";
+    btn.style.cssText = "background:rgba(74,222,128,0.12);color:#4ADE80;border:1px solid rgba(74,222,128,0.3)";
+    setTimeout(() => { btn.textContent = "Add to Cart"; btn.style.cssText = ""; }, 2200);
+}
+
+function viewProd(name) {
+    addAI(`Here's what makes <strong>${name}</strong> stand out. Want me to compare it against alternatives, find a cheaper option, or check availability?`, true);
+    document.getElementById("chatMessages").scrollTop = 999999;
+}
+
+// ──────────────────────────────────────────────
+// AVATAR STATE MANAGEMENT
+// ──────────────────────────────────────────────
+function setAvatarState(state) {
+    const headerAvatar = document.getElementById("headerAvatar");
+    const modalOrb = document.getElementById("modalOrb");
+    const wave = document.getElementById("voiceWave");
+    const label = document.getElementById("voiceStatusLabel");
+
+    headerAvatar.className = "agent-avatar";
+    if (state === "speaking") {
+        headerAvatar.classList.add("speaking");
+        if (wave) { wave.className = "voice-wave"; } // animated
+        if (label) label.textContent = "Sicero is speaking...";
+    } else if (state === "listening") {
+        headerAvatar.classList.add("listening");
+        if (wave) wave.className = "voice-wave listening";
+        if (label) label.textContent = "Listening...";
+    } else {
+        if (wave) wave.className = "voice-wave idle";
+        if (label) label.textContent = "Press & hold to speak";
+    }
+}
+
+// ──────────────────────────────────────────────
+// VOICE INPUT (Web Speech API)
+// ──────────────────────────────────────────────
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recognition = null;
+let isListening = false;
+
+if (SpeechRecognition) {
+    recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.lang = "en-US";
+
+    recognition.onstart = () => {
+        isListening = true;
+        setAvatarState("listening");
+        document.getElementById("voiceTranscript").textContent = "";
+    };
+
+    recognition.onresult = (e) => {
+        let interim = "";
+        let final = "";
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+            const t = e.results[i][0].transcript;
+            if (e.results[i].isFinal) final += t;
+            else interim += t;
+        }
+        document.getElementById("voiceTranscript").textContent = final || interim;
+        if (final) {
+            document.getElementById("chatInput").value = final;
+        }
+    };
+
+    recognition.onend = () => {
+        isListening = false;
+        setAvatarState("idle");
+        document.getElementById("voiceHoldBtn").classList.remove("active");
+        document.getElementById("voiceHoldBtn").innerHTML = "🎙 Hold to Speak";
+        // Auto-send if there's a transcript
+        const transcript = document.getElementById("voiceTranscript").textContent.trim();
+        if (transcript) {
+            setTimeout(() => {
+                closeVoiceModal();
+                document.getElementById("chatInput").value = transcript;
+                sendMessage();
+            }, 600);
+        }
+    };
+
+    recognition.onerror = () => {
+        isListening = false;
+        setAvatarState("idle");
+        document.getElementById("voiceStatusLabel").textContent = "Mic not available — try typing instead";
+    };
+}
+
+function startListening() {
+    if (!recognition) {
+        document.getElementById("voiceStatusLabel").textContent = "Voice not supported in this browser";
+        return;
+    }
+    if (isListening) return;
+    recognition.start();
+    document.getElementById("voiceHoldBtn").classList.add("active");
+    document.getElementById("voiceHoldBtn").innerHTML = "🔴 Listening...";
+}
+
+function stopListening() {
+    if (recognition && isListening) recognition.stop();
+}
+
+// Inline mic button (in chat footer)
+function toggleMicInline() {
+    if (!recognition) {
+        alert("Voice recognition is not supported in this browser. Try Chrome.");
+        return;
+    }
+    const btn = document.getElementById("micBtn");
+    if (!isListening) {
+        recognition.onresult = (e) => {
+            let final = "";
+            for (let i = e.resultIndex; i < e.results.length; i++) {
+                if (e.results[i].isFinal) final += e.results[i][0].transcript;
+            }
+            if (final) document.getElementById("chatInput").value = final;
+        };
+        recognition.onend = () => {
+            isListening = false;
+            btn.classList.remove("recording");
+            btn.title = "Voice input";
+            const txt = document.getElementById("chatInput").value.trim();
+            if (txt) sendMessage();
+        };
+        recognition.start();
+        btn.classList.add("recording");
+        btn.title = "Listening... release to send";
+    } else {
+        recognition.stop();
+    }
+}
+
+// ──────────────────────────────────────────────
+// TEXT-TO-SPEECH (AI speaks back)
+// ──────────────────────────────────────────────
+function speakText(text) {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text.substring(0, 200));
+    utter.rate = 1.05;
+    utter.pitch = 1.0;
+    utter.volume = 0.85;
+    // Pick a good voice if available
+    const voices = window.speechSynthesis.getVoices();
+    const pref = voices.find(v => v.name.includes("Samantha") || v.name.includes("Google US English") || v.name.includes("Alex"));
+    if (pref) utter.voice = pref;
+    utter.onstart = () => setAvatarState("speaking");
+    utter.onend = () => setAvatarState("idle");
+    window.speechSynthesis.speak(utter);
+}
+
+// ──────────────────────────────────────────────
+// VOICE MODAL
+// ──────────────────────────────────────────────
+function openVoiceModal() {
+    document.getElementById("voiceModal").classList.add("open");
+    document.body.style.overflow = "hidden";
+}
+
+function closeVoiceModal() {
+    document.getElementById("voiceModal").classList.remove("open");
+    document.body.style.overflow = "";
+    if (recognition && isListening) recognition.stop();
+}
+
+// Close on backdrop click
+document.getElementById("voiceModal").addEventListener("click", function(e) {
+    if (e.target === this) closeVoiceModal();
+});
+
+// ──────────────────────────────────────────────
+// PARTICLES
+// ──────────────────────────────────────────────
+(function spawnParticles() {
+    const hero = document.querySelector(".hero");
+    const colors = ["rgba(201,168,76,0.4)","rgba(109,79,194,0.4)","rgba(201,168,76,0.2)"];
+    for (let i = 0; i < 18; i++) {
+        const p = document.createElement("div");
+        p.className = "particle";
+        const size = Math.random() * 4 + 2;
+        p.style.cssText = `width:${size}px;height:${size}px;background:${colors[Math.floor(Math.random()*colors.length)]};left:${Math.random()*100}%;animation-duration:${Math.random()*12+10}s;animation-delay:${Math.random()*10}s;`;
+        hero.appendChild(p);
+    }
+})();
+
+// ──────────────────────────────────────────────
+// SCROLL REVEAL
+// ──────────────────────────────────────────────
+const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add("visible"); observer.unobserve(e.target); }
+    });
+}, { threshold: 0.1 });
+
+document.querySelectorAll(".reveal").forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
