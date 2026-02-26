@@ -802,6 +802,17 @@ const DB = {
         { name:"Wix Studio Plan",            cat:"SaaS",      desc:"Advanced website builder with team collaboration and custom code support.",                          price:"$36/mo", num:36, rating:"4.5", reviews:"22k",   match:"83%", img:UNSPLASH+"1586953208448-b95a79798f07?w=80&h=80&fit=crop", link:"https://www.wix.com/upgrade/website" },
         { name:"Canva Pro",                  cat:"SaaS",      desc:"Brand kit, Magic AI tools, 100M+ premium assets. Design made effortlessly fast.",                   price:"$15/mo", num:15, rating:"4.8", reviews:"67k",   match:"80%", img:UNSPLASH+"1467232004584-a241de8bcf5d?w=80&h=80&fit=crop", link:"https://www.canva.com/pricing/" },
     ],
+    books: [
+        { name:"Thinking, Fast and Slow",        cat:"Psychology",       desc:"Kahneman's Nobel-prize insight into the two systems that drive how we think and decide.",  price:"$17", num:17, rating:"4.7", reviews:"52k",   match:"99%", img:UNSPLASH+"1512820537774-e5b8d3f74a40?w=80&h=80&fit=crop", link:AMZ+"Thinking+Fast+and+Slow+Kahneman" },
+        { name:"Sapiens",                         cat:"History",          desc:"How Homo sapiens came to dominate the planet. The essential macro-history of our era.",    price:"$18", num:18, rating:"4.8", reviews:"89k",   match:"97%", img:UNSPLASH+"1481627834876-b7833e8f5fae?w=80&h=80&fit=crop", link:AMZ+"Sapiens+Yuval+Noah+Harari" },
+        { name:"Atomic Habits",                   cat:"Self-Improvement", desc:"Science-backed guide to building good habits and breaking bad ones. Practical and lasting.", price:"$14", num:14, rating:"4.8", reviews:"120k",  match:"95%", img:UNSPLASH+"1544716278-ca5e3f4abd8c?w=80&h=80&fit=crop", link:AMZ+"Atomic+Habits+James+Clear" },
+        { name:"Meditations — Marcus Aurelius",   cat:"Philosophy",       desc:"2,000 years of Stoic wisdom. A private journal that became a timeless guide to a good life.", price:"$9",  num:9,  rating:"4.8", reviews:"38k",   match:"93%", img:UNSPLASH+"1512820537774-e5b8d3f74a40?w=80&h=80&fit=crop", link:AMZ+"Meditations+Marcus+Aurelius+Gregory+Hays" },
+        { name:"The Psychology of Money",         cat:"Finance",          desc:"Timeless lessons on wealth, greed, and happiness. Morgan Housel's deceptively simple masterpiece.", price:"$16", num:16, rating:"4.8", reviews:"47k", match:"91%", img:UNSPLASH+"1481627834876-b7833e8f5fae?w=80&h=80&fit=crop", link:AMZ+"The+Psychology+of+Money+Morgan+Housel" },
+        { name:"Poor Charlie's Almanack",         cat:"Investing",        desc:"Mental models and worldly wisdom from Charlie Munger. A favourite of the world's best investors.", price:"$48", num:48, rating:"4.9", reviews:"14k", match:"89%", img:UNSPLASH+"1544716278-ca5e3f4abd8c?w=80&h=80&fit=crop", link:AMZ+"Poor+Charlie%27s+Almanack" },
+        { name:"The Almanack of Naval Ravikant",  cat:"Philosophy",       desc:"Wealth, happiness and clear thinking from Silicon Valley's most respected philosopher.",   price:"$0",  num:0,  rating:"4.8", reviews:"31k",   match:"87%", img:UNSPLASH+"1512820537774-e5b8d3f74a40?w=80&h=80&fit=crop", link:AMZ+"Almanack+Naval+Ravikant" },
+        { name:"Gödel, Escher, Bach",             cat:"Science",          desc:"A dazzling journey through mathematics, art, and AI — winner of the Pulitzer Prize.",      price:"$23", num:23, rating:"4.7", reviews:"9.2k",  match:"84%", img:UNSPLASH+"1481627834876-b7833e8f5fae?w=80&h=80&fit=crop", link:AMZ+"Godel+Escher+Bach+Hofstadter" },
+        { name:"The 48 Laws of Power",            cat:"Strategy",         desc:"Robert Greene's definitive guide to the dynamics of power and how to wield them wisely.",   price:"$22", num:22, rating:"4.6", reviews:"41k",   match:"81%", img:UNSPLASH+"1544716278-ca5e3f4abd8c?w=80&h=80&fit=crop", link:AMZ+"48+Laws+of+Power+Robert+Greene" },
+    ],
 };
 
 // ══════════════════════════════════════════════
@@ -818,6 +829,7 @@ const INTENTS = [
     { kw:["travel","luggage","bag","backpack","trip","vacation","suitcase","carry on","pack"], db:"travel", ack:"Finding the best travel gear ✈️", clarify:["How long are your typical trips?","Light packer or full-bag traveler?"] },
     { kw:["fitness","workout","gym","health","exercise","yoga","weight","dumbbell","tracker","sport"], db:"fitness", ack:"Curating fitness gear for you 💪", clarify:["Strength, cardio, flexibility, or recovery focus?"] },
     { kw:["service","freelancer","business","software","tool","saas","professional","agency","b2b"], db:"services", ack:"Sourcing top services and tools 💼", clarify:["What's your team size?","Looking for a one-time service or monthly subscription?"] },
+    { kw:["book","books","read","reading","well read","well-read","novel","fiction","nonfiction","non-fiction","literature","knowledge","audiobook","philosophy","history","biography","self-improvement","self improvement","smart","intellectual","wisdom","learn","learning","education","educational"], db:"books", ack:"Pulling the essential reads for you 📚", clarify:["Any preferred genre — self-improvement, history, philosophy, or fiction?","Looking for something quick and practical, or a long deep-dive?"] },
 ];
 
 let msgCount = 0;
@@ -863,7 +875,7 @@ function setFilter(btn, mode) {
 function clearChat() {
     document.getElementById('chatMessages').innerHTML = '';
     addAI("Chat cleared — what are you looking for? I'll find it right away!");
-    document.getElementById('emptyState').style.display = '';
+    resetEmptyState();
     document.querySelectorAll('.product-card,.searching-row').forEach(c => c.remove());
     document.getElementById('resultsCount').textContent = '0 found';
     lastProducts = []; lastDB = null; msgCount = 0; pendingClarify = false;
@@ -920,6 +932,23 @@ function showSearchingInResults() {
 }
 
 function removeSearchingInResults() { const s = document.getElementById('searchingRow'); if (s) s.remove(); }
+
+function resetEmptyState() {
+    const el = document.getElementById('emptyState');
+    el.innerHTML = `<div class="empty-icon">✦</div><h3>Start a conversation</h3><p>Real product recommendations with live buy links will appear here as you chat.</p>`;
+    el.style.display = '';
+}
+
+function showNoResults(aiMsg) {
+    removeSearchingInResults();
+    document.querySelectorAll('.product-card').forEach(c => c.remove());
+    const el = document.getElementById('emptyState');
+    el.innerHTML = `<div class="empty-icon" style="opacity:0.5">🤔</div><h3>Not sure what you mean</h3><p>Try mentioning a category like <strong style="color:var(--gold)">headphones</strong>, <strong style="color:var(--gold)">books</strong>, <strong style="color:var(--gold)">fitness gear</strong>, or <strong style="color:var(--gold)">gaming setup</strong>.</p>`;
+    el.style.display = '';
+    document.getElementById('resultsCount').textContent = '0 found';
+    lastProducts = [];
+    addAI(aiMsg, true);
+}
 
 function appendMsg(html) {
     const msgs = document.getElementById('chatMessages');
@@ -992,12 +1021,8 @@ function process(msg) {
             }, 1200);
         }
     } else {
-        // Totally unknown — show popular products and ask gently
-        const fallbackDB = Object.keys(DB);
-        const fallbackProds = DB[fallbackDB[msgCount % fallbackDB.length]];
-        lastProducts = fallbackProds;
-        addAI(`Hmm, I want to make sure I find exactly what you're after. Could you tell me a bit more — what category is this in, and roughly what's your budget? In the meantime, here are some popular picks:`, true);
-        showProducts(fallbackProds);
+        // Unknown query — ask clearly, never show unrelated products
+        showNoResults(`I want to find exactly the right thing for you! Could you give me a bit more detail? Try mentioning the type of product, a category (e.g. headphones, books, fitness gear), or what you want to use it for.`);
     }
 }
 
