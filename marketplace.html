@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sicero — AI Marketplace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body,#root{height:100%;width:100%;}
+  body{background:#080a1a;font-family:'DM Sans',-apple-system,sans-serif;color:#fff;overflow:hidden;}
+  ::-webkit-scrollbar{width:4px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:rgba(212,175,55,0.3);border-radius:2px;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+  @keyframes slideIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @keyframes ticker{0%{opacity:0;transform:translateY(8px)}15%{opacity:1;transform:none}85%{opacity:1;transform:none}100%{opacity:0;transform:translateY(-8px)}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+const PRODUCTS = [
+  {id:1,name:'MacBook Pro M3 Pro 14"',brand:'Apple',img:'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400&q=80',price:1299,orig:1599,rating:4.9,reviews:2100,marketplace:'Amazon',badge:'Prime',score:97,delivery:'Tomorrow',free:true,tag:'Best Value',tagColor:'gold',aiNote:'Best performance-per-dollar for video editing in 2024',trend:'↓ $300 this month',bestTime:'Buy Now',resale:'85%',condition:'New'},
+  {id:2,name:'Dell XPS 15 OLED',brand:'Dell',img:'https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=400&q=80',price:1049,orig:1299,rating:4.7,reviews:1840,marketplace:'Best Buy',badge:'Open Box',score:91,delivery:'2 days',free:true,tag:'Price Drop',tagColor:'green',aiNote:'Stunning OLED display — ideal for creative professionals',trend:'↓ $250 in 7 days',bestTime:'Buy Now',resale:'72%',condition:'Open Box'},
+  {id:3,name:'HP Spectre x360 13.5"',brand:'HP',img:'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&q=80',price:879,orig:1099,rating:4.6,reviews:920,marketplace:'Walmart',badge:'Gainsaver',score:88,delivery:'3 days',free:false,tag:'AI Pick',tagColor:'purple',aiNote:'Top pick for portability under $900',trend:'Stable 30 days',bestTime:'Good time',resale:'68%',condition:'New'},
+  {id:4,name:'Razer Blade 16 RTX 4080',brand:'Razer',img:'https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=400&q=80',price:2499,orig:2799,rating:4.8,reviews:640,marketplace:'Razer Store',badge:'Official',score:93,delivery:'2 days',free:true,tag:'Top Rated',tagColor:'blue',aiNote:'Unrivaled GPU power for 4K gaming & rendering',trend:'↓ $300 from peak',bestTime:'Watch price',resale:'78%',condition:'New'},
+  {id:5,name:'LG Gram 17 Ultra-Light',brand:'LG',img:'https://images.unsplash.com/photo-1484788984921-03950022c9ef?w=400&q=80',price:749,orig:999,rating:4.5,reviews:1200,marketplace:'Amazon',badge:'Prime',score:85,delivery:'Tomorrow',free:true,tag:'Budget Pick',tagColor:'cyan',aiNote:'Lightest 17" laptop — perfect for travel',trend:'Lowest in 90 days',bestTime:'Buy Now',resale:'60%',condition:'New'},
+  {id:6,name:'Microsoft Surface Pro 9',brand:'Microsoft',img:'https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?w=400&q=80',price:999,orig:1299,rating:4.4,reviews:870,marketplace:'Microsoft Store',badge:'Certified',score:82,delivery:'3 days',free:true,tag:null,tagColor:null,aiNote:'Best Windows tablet/laptop hybrid for professionals',trend:'↓ $150 recently',bestTime:'Good time',resale:'65%',condition:'New'},
+];
+
+const TAG_COLORS = {
+  gold:{bg:'rgba(212,175,55,0.15)',border:'rgba(212,175,55,0.4)',text:'#D4AF37'},
+  green:{bg:'rgba(34,197,94,0.12)',border:'rgba(34,197,94,0.35)',text:'#4ade80'},
+  purple:{bg:'rgba(139,92,246,0.12)',border:'rgba(139,92,246,0.35)',text:'#a78bfa'},
+  blue:{bg:'rgba(59,130,246,0.12)',border:'rgba(59,130,246,0.35)',text:'#60a5fa'},
+  cyan:{bg:'rgba(6,182,212,0.12)',border:'rgba(6,182,212,0.35)',text:'#22d3ee'},
+};
+
+const CHAT_INIT = [
+  {role:'ai',text:"Hey! I'm Sicero — your AI shopping concierge. 👋 Tell me what you're after and I'll find you the best deals across every marketplace."},
+  {role:'user',text:'💻 Laptop for video editing'},
+  {role:'ai',text:"Perfect. I've curated 40 results for video editing laptops. The MacBook Pro M3 is your best value right now at $300 off — Sicero Score 97."},
+];
+
+const QUICK = ['🎧 Headphones under $200','💻 Laptop for video editing','🌿 Organic skincare','👟 Running shoes','🎮 Gaming setup under $1500','✈️ Travel backpack'];
+
+const INSIGHTS = [
+  '📉 MacBook Pro dropped $300 — lowest in 90 days',
+  '⚡ 3 items on your list are rising in price',
+  '🎯 Best time to buy laptops: right now',
+  '💡 Dell XPS open-box saves $250 same warranty',
+];
+
+function ScoreRing({score}){
+  const color = score>=90?'#D4AF37':score>=80?'#60a5fa':'#4ade80';
+  const r=18, circ=2*Math.PI*r, dash=(score/100)*circ;
+  return (
+    <div style={{position:'relative',width:48,height:48,display:'flex',alignItems:'center',justifyContent:'center'}}>
+      <svg width="48" height="48" style={{transform:'rotate(-90deg)',position:'absolute'}}>
+        <circle cx="24" cy="24" r={r} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="3.5"/>
+        <circle cx="24" cy="24" r={r} fill="none" stroke={color} strokeWidth="3.5"
+          strokeDasharray={`${dash} ${circ}`} strokeLinecap="round"
+          style={{filter:`drop-shadow(0 0 4px ${color}80)`}}/>
+      </svg>
+      <span style={{position:'relative',fontSize:11,fontWeight:800,color}}>{score}</span>
+    </div>
+  );
+}
+
+function ProductCard({p,onBuy}){
+  const [hov,setHov]=useState(false);
+  const [buying,setBuying]=useState(false);
+  const tag=p.tag?TAG_COLORS[p.tagColor]:null;
+  const savings=p.orig-p.price;
+  const buy=()=>{setBuying(true);setTimeout(()=>{setBuying(false);onBuy(p);},1200);};
+  return (
+    <div onMouseEnter={()=>setHov(true)} onMouseLeave={()=>setHov(false)} style={{
+      background:hov?'linear-gradient(135deg,rgba(255,255,255,0.07),rgba(255,255,255,0.03))':'linear-gradient(135deg,rgba(255,255,255,0.04),rgba(255,255,255,0.015))',
+      border:hov?'1px solid rgba(212,175,55,0.3)':'1px solid rgba(255,255,255,0.07)',
+      borderRadius:16,transition:'all 0.25s ease',
+      transform:hov?'translateY(-3px)':'none',
+      boxShadow:hov?'0 20px 60px rgba(0,0,0,0.4),0 0 0 1px rgba(212,175,55,0.1)':'0 4px 20px rgba(0,0,0,0.2)',
+      overflow:'hidden',position:'relative',display:'flex',flexDirection:'column',
+      animation:'fadeUp 0.4s ease both',
+    }}>
+      {tag&&<div style={{position:'absolute',top:12,left:12,zIndex:2,background:tag.bg,border:`1px solid ${tag.border}`,borderRadius:6,padding:'3px 8px',fontSize:10,fontWeight:700,color:tag.text,letterSpacing:'0.05em',textTransform:'uppercase',backdropFilter:'blur(8px)'}}>{p.tag}</div>}
+      <div style={{position:'absolute',top:12,right:12,zIndex:2,background:'rgba(0,0,0,0.5)',backdropFilter:'blur(8px)',border:'1px solid rgba(255,255,255,0.1)',borderRadius:6,padding:'3px 8px',fontSize:9,fontWeight:600,color:'rgba(255,255,255,0.6)',letterSpacing:'0.08em',textTransform:'uppercase'}}>{p.marketplace}</div>
+      <div style={{position:'relative',height:155,overflow:'hidden',background:'rgba(0,0,0,0.3)'}}>
+        <img src={p.img} alt={p.name} style={{width:'100%',height:'100%',objectFit:'cover',opacity:0.85,transition:'transform 0.4s ease',transform:hov?'scale(1.06)':'scale(1)'}}/>
+        <div style={{position:'absolute',inset:0,background:'linear-gradient(to top,rgba(8,10,26,0.85) 0%,transparent 55%)'}}/>
+      </div>
+      <div style={{padding:'13px 15px 15px',flex:1,display:'flex',flexDirection:'column',gap:7}}>
+        <div>
+          <div style={{fontSize:10,color:'rgba(255,255,255,0.3)',textTransform:'uppercase',letterSpacing:'0.1em',marginBottom:2}}>{p.brand}</div>
+          <div style={{fontSize:13.5,fontWeight:600,color:'#fff',lineHeight:1.3}}>{p.name}</div>
+        </div>
+        <div style={{display:'flex',alignItems:'baseline',gap:7}}>
+          <span style={{fontSize:19,fontWeight:800,color:'#D4AF37'}}>${p.price.toLocaleString()}</span>
+          <span style={{fontSize:11,color:'rgba(255,255,255,0.3)',textDecoration:'line-through'}}>${p.orig.toLocaleString()}</span>
+          <span style={{fontSize:10,color:'#4ade80',fontWeight:700}}>-${savings}</span>
+        </div>
+        <div style={{display:'flex',alignItems:'center',gap:5}}>
+          {[1,2,3,4,5].map(i=><span key={i} style={{fontSize:9,color:i<=Math.round(p.rating)?'#D4AF37':'rgba(255,255,255,0.18)'}}>★</span>)}
+          <span style={{fontSize:10.5,color:'rgba(255,255,255,0.45)',marginLeft:2}}>{p.rating} ({(p.reviews/1000).toFixed(1)}k)</span>
+        </div>
+        <div style={{background:'rgba(139,92,246,0.08)',border:'1px solid rgba(139,92,246,0.15)',borderRadius:7,padding:'5px 9px',fontSize:11,color:'rgba(255,255,255,0.52)',lineHeight:1.4}}>
+          <span style={{color:'#a78bfa',fontWeight:600}}>AI: </span>{p.aiNote}
+        </div>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+          <div style={{fontSize:10,color:p.free?'#4ade80':'rgba(255,255,255,0.35)'}}>{p.free?'✓ Free':'+ Paid'} · {p.delivery}</div>
+          <div style={{display:'flex',alignItems:'center',gap:4}}>
+            <span style={{fontSize:9.5,color:'rgba(255,255,255,0.25)'}}>Score</span>
+            <ScoreRing score={p.score}/>
+          </div>
+        </div>
+        <button onClick={buy} style={{
+          marginTop:2,width:'100%',padding:'9px 0',
+          background:buying?'linear-gradient(135deg,#4ade80,#22c55e)':'linear-gradient(135deg,#D4AF37 0%,#B8960C 100%)',
+          border:'none',borderRadius:10,color:buying?'#fff':'#0a0c1c',fontWeight:700,fontSize:12.5,cursor:'pointer',
+          transition:'all 0.3s ease',letterSpacing:'0.03em',
+          boxShadow:buying?'0 4px 20px rgba(74,222,128,0.3)':'0 4px 20px rgba(212,175,55,0.25)',
+          transform:buying?'scale(0.97)':'scale(1)',fontFamily:'inherit',
+        }}>{buying?'✓ Adding to cart…':'Buy Now · '+p.marketplace}</button>
+      </div>
+    </div>
+  );
+}
+
+function CheckoutModal({p,onClose}){
+  const [step,setStep]=useState(0);
+  const steps=['Finding cheapest source','Verifying availability','Securing your price','Order confirmed!'];
+  useEffect(()=>{if(step<3){const t=setTimeout(()=>setStep(s=>s+1),900);return()=>clearTimeout(t);}},[step]);
+  return (
+    <div style={{position:'fixed',inset:0,zIndex:1000,background:'rgba(5,7,20,0.88)',backdropFilter:'blur(14px)',display:'flex',alignItems:'center',justifyContent:'center'}}>
+      <div style={{background:'linear-gradient(135deg,rgba(18,20,45,0.99),rgba(10,12,30,0.99))',border:'1px solid rgba(212,175,55,0.25)',borderRadius:20,padding:36,maxWidth:450,width:'90%',boxShadow:'0 40px 100px rgba(0,0,0,0.6)'}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:26}}>
+          <div>
+            <div style={{fontSize:10,color:'rgba(212,175,55,0.7)',textTransform:'uppercase',letterSpacing:'0.12em',marginBottom:5}}>Sicero Checkout</div>
+            <div style={{fontSize:19,fontWeight:700,color:'#fff'}}>{p.name}</div>
+            <div style={{fontSize:24,fontWeight:800,color:'#D4AF37',marginTop:3}}>${p.price.toLocaleString()}</div>
+          </div>
+          <button onClick={onClose} style={{background:'rgba(255,255,255,0.07)',border:'1px solid rgba(255,255,255,0.1)',color:'rgba(255,255,255,0.4)',cursor:'pointer',borderRadius:8,padding:'6px 11px',fontSize:15,fontFamily:'inherit'}}>✕</button>
+        </div>
+        <div style={{marginBottom:24}}>
+          {steps.map((s,i)=>(
+            <div key={i} style={{display:'flex',alignItems:'center',gap:11,marginBottom:13}}>
+              <div style={{width:28,height:28,borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:700,flexShrink:0,background:i<step?'linear-gradient(135deg,#D4AF37,#B8960C)':i===step?'rgba(212,175,55,0.12)':'rgba(255,255,255,0.05)',border:i===step?'1px solid rgba(212,175,55,0.4)':'1px solid transparent',color:i<step?'#0a0c1c':i===step?'#D4AF37':'rgba(255,255,255,0.2)',transition:'all 0.4s ease'}}>
+                {i<step?'✓':i+1}
+              </div>
+              <div style={{fontSize:13,fontWeight:i===step?600:400,color:i<step?'#4ade80':i===step?'#fff':'rgba(255,255,255,0.22)',transition:'all 0.3s ease'}}>
+                {s}{i===step&&step<3&&<span style={{marginLeft:6,animation:'pulse 1s infinite',display:'inline-block'}}>···</span>}
+              </div>
+            </div>
+          ))}
+        </div>
+        {step===3&&<div style={{background:'rgba(74,222,128,0.08)',border:'1px solid rgba(74,222,128,0.2)',borderRadius:12,padding:16,textAlign:'center'}}>
+          <div style={{fontSize:26,marginBottom:7}}>🎉</div>
+          <div style={{fontSize:14,fontWeight:600,color:'#4ade80',marginBottom:3}}>Order Placed Successfully</div>
+          <div style={{fontSize:11.5,color:'rgba(255,255,255,0.4)'}}>Sicero is fulfilling from {p.marketplace} · Est. {p.delivery}</div>
+        </div>}
+        <div style={{marginTop:18,paddingTop:12,borderTop:'1px solid rgba(255,255,255,0.06)',display:'flex',justifyContent:'space-between'}}>
+          <div style={{fontSize:10.5,color:'rgba(255,255,255,0.22)'}}>Powered by Sicero · Small margin included</div>
+          <div style={{fontSize:10.5,color:'rgba(212,175,55,0.5)'}}>🔒 Secure</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function App(){
+  const [chat,setChat]=useState(CHAT_INIT);
+  const [input,setInput]=useState('');
+  const [sort,setSort]=useState('Top Match');
+  const [filter,setFilter]=useState('All');
+  const [checkout,setCheckout]=useState(null);
+  const [alertOn,setAlertOn]=useState(false);
+  const [insightIdx,setInsightIdx]=useState(0);
+  const chatEnd=useRef(null);
+
+  useEffect(()=>{const t=setInterval(()=>setInsightIdx(i=>(i+1)%INSIGHTS.length),3500);return()=>clearInterval(t);},[]);
+  useEffect(()=>{if(chatEnd.current)chatEnd.current.scrollIntoView({behavior:'smooth'});},[chat]);
+
+  const send=()=>{
+    if(!input.trim())return;
+    setChat(c=>[...c,{role:'user',text:input},{role:'ai',text:"Great! Scanning 200+ marketplaces now… Here are your top picks sorted by Sicero Score."}]);
+    setInput('');
+  };
+
+  const SORTS=['Top Match','Price ↑','Price ↓','Score','Delivery'];
+  const FILTERS=['All','Laptops','Gaming','2-in-1','Under $1000'];
+
+  return (
+    <div style={{height:'100vh',display:'flex',flexDirection:'column',overflow:'hidden'}}>
+      {/* NAV */}
+      <header style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'0 28px',height:58,background:'rgba(8,10,26,0.97)',backdropFilter:'blur(20px)',borderBottom:'1px solid rgba(255,255,255,0.05)',flexShrink:0,zIndex:50}}>
+        <div style={{display:'flex',alignItems:'center',gap:9}}>
+          <div style={{width:30,height:30,borderRadius:8,background:'linear-gradient(135deg,#7c3aed,#4f46e5)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14}}>✦</div>
+          <span style={{fontFamily:"'Syne',sans-serif",fontWeight:800,fontSize:18}}>Sicero</span>
+          <div style={{marginLeft:10,padding:'3px 9px',borderRadius:20,background:'rgba(212,175,55,0.1)',border:'1px solid rgba(212,175,55,0.2)',fontSize:9.5,color:'#D4AF37',fontWeight:700,letterSpacing:'0.08em'}}>MARKETPLACE</div>
+        </div>
+        <div style={{display:'flex',gap:26}}>
+          {['How It Works','Categories','Reviews'].map(n=><a key={n} href="#" style={{fontSize:13,color:'rgba(255,255,255,0.45)',textDecoration:'none'}}>{n}</a>)}
+        </div>
+        <div style={{display:'flex',gap:10,alignItems:'center'}}>
+          <div style={{padding:'5px 13px',borderRadius:20,background:'rgba(139,92,246,0.1)',border:'1px solid rgba(139,92,246,0.2)',fontSize:10.5,color:'rgba(255,255,255,0.55)',maxWidth:250,overflow:'hidden',whiteSpace:'nowrap'}}>
+            <span key={insightIdx} style={{animation:'ticker 3.5s ease'}}>{INSIGHTS[insightIdx]}</span>
+          </div>
+          <button style={{padding:'7px 16px',background:'linear-gradient(135deg,#D4AF37,#B8960C)',border:'none',borderRadius:9,color:'#0a0c1c',fontWeight:700,fontSize:12.5,cursor:'pointer',fontFamily:'inherit'}}>Sign In</button>
+        </div>
+      </header>
+
+      {/* BODY */}
+      <div style={{display:'flex',flex:1,overflow:'hidden'}}>
+
+        {/* LEFT CHAT */}
+        <aside style={{width:300,flexShrink:0,borderRight:'1px solid rgba(255,255,255,0.05)',display:'flex',flexDirection:'column',background:'linear-gradient(180deg,rgba(10,12,28,0.99),rgba(8,10,22,1))'}}>
+          <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(255,255,255,0.05)',display:'flex',alignItems:'center',gap:10,flexShrink:0}}>
+            <div style={{position:'relative'}}>
+              <div style={{width:34,height:34,borderRadius:'50%',background:'linear-gradient(135deg,#6d28d9,#4f46e5)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:15,boxShadow:'0 0 0 2px rgba(109,40,217,0.3)'}}>🛍</div>
+              <div style={{position:'absolute',bottom:0,right:0,width:8,height:8,background:'#4ade80',borderRadius:'50%',border:'1.5px solid #080a1a'}}/>
+            </div>
+            <div>
+              <div style={{fontSize:13,fontWeight:700}}>Sicero AI</div>
+              <div style={{fontSize:9.5,color:'#4ade80'}}>● Online · Concierge Mode</div>
+            </div>
+          </div>
+
+          <div style={{flex:1,overflowY:'auto',padding:'14px 14px 6px'}}>
+            {chat.map((m,i)=>(
+              <div key={i} style={{marginBottom:10,display:'flex',justifyContent:m.role==='user'?'flex-end':'flex-start',animation:'slideIn 0.3s ease'}}>
+                <div style={{maxWidth:'83%',padding:'9px 13px',borderRadius:m.role==='user'?'13px 13px 3px 13px':'13px 13px 13px 3px',background:m.role==='user'?'linear-gradient(135deg,#6d28d9,#4f46e5)':'rgba(255,255,255,0.05)',border:m.role==='ai'?'1px solid rgba(255,255,255,0.07)':'none',fontSize:12,lineHeight:1.5,color:m.role==='user'?'#fff':'rgba(255,255,255,0.78)'}}>
+                  {m.text}
+                </div>
+              </div>
+            ))}
+            <div ref={chatEnd}/>
+          </div>
+
+          <div style={{padding:'7px 13px',borderTop:'1px solid rgba(255,255,255,0.04)',flexShrink:0}}>
+            <div style={{fontSize:9,color:'rgba(255,255,255,0.22)',textTransform:'uppercase',letterSpacing:'0.1em',marginBottom:7}}>Quick prompts</div>
+            <div style={{display:'flex',flexWrap:'wrap',gap:5}}>
+              {QUICK.map((q,i)=>(
+                <button key={i} onClick={()=>setInput(q)} style={{padding:'4px 9px',borderRadius:7,fontSize:10,fontWeight:500,background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.08)',color:'rgba(255,255,255,0.45)',cursor:'pointer',whiteSpace:'nowrap',fontFamily:'inherit'}}>{q}</button>
+              ))}
+            </div>
+          </div>
+
+          <div style={{padding:'10px 13px 14px',borderTop:'1px solid rgba(255,255,255,0.05)',flexShrink:0}}>
+            <div style={{display:'flex',gap:7,alignItems:'center',background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.1)',borderRadius:11,padding:'5px 7px 5px 13px'}}>
+              <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==='Enter'&&send()} placeholder="Describe what you're looking for…" style={{flex:1,background:'none',border:'none',color:'#fff',fontSize:12,outline:'none',fontFamily:'inherit'}}/>
+              <button onClick={send} style={{width:29,height:29,borderRadius:8,background:'linear-gradient(135deg,#D4AF37,#B8960C)',border:'none',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,color:'#0a0c1c',fontFamily:'inherit'}}>→</button>
+            </div>
+          </div>
+        </aside>
+
+        {/* CENTER GRID */}
+        <main style={{flex:1,overflowY:'auto',padding:'22px 20px'}}>
+          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:18,flexWrap:'wrap',gap:10}}>
+            <div style={{display:'flex',alignItems:'center',gap:11}}>
+              <h1 style={{fontFamily:"'Syne',sans-serif",fontSize:19,fontWeight:800}}>Curated Results</h1>
+              <div style={{padding:'3px 9px',borderRadius:20,background:'rgba(212,175,55,0.12)',border:'1px solid rgba(212,175,55,0.25)',fontSize:10.5,color:'#D4AF37',fontWeight:700}}>40 found</div>
+              <div style={{fontSize:11.5,color:'rgba(255,255,255,0.3)'}}>for "laptop for video editing"</div>
+            </div>
+            <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+              {FILTERS.map(f=>(
+                <button key={f} onClick={()=>setFilter(f)} style={{padding:'4px 11px',borderRadius:7,fontSize:11,fontWeight:600,cursor:'pointer',background:filter===f?'rgba(212,175,55,0.15)':'rgba(255,255,255,0.04)',border:filter===f?'1px solid rgba(212,175,55,0.4)':'1px solid rgba(255,255,255,0.07)',color:filter===f?'#D4AF37':'rgba(255,255,255,0.4)',fontFamily:'inherit'}}>{f}</button>
+              ))}
+            </div>
+          </div>
+
+          <div style={{display:'flex',alignItems:'center',gap:5,marginBottom:16,padding:'9px 13px',background:'rgba(255,255,255,0.02)',border:'1px solid rgba(255,255,255,0.06)',borderRadius:11}}>
+            <span style={{fontSize:10.5,color:'rgba(255,255,255,0.28)',marginRight:4}}>Sort:</span>
+            {SORTS.map(s=>(
+              <button key={s} onClick={()=>setSort(s)} style={{padding:'3px 11px',borderRadius:6,fontSize:11,fontWeight:600,cursor:'pointer',background:sort===s?'linear-gradient(135deg,#D4AF37,#B8960C)':'transparent',border:'none',color:sort===s?'#0a0c1c':'rgba(255,255,255,0.38)',fontFamily:'inherit'}}>{s}</button>
+            ))}
+            <div style={{marginLeft:'auto'}}>
+              <button onClick={()=>setAlertOn(a=>!a)} style={{padding:'4px 11px',borderRadius:7,fontSize:11,fontWeight:600,cursor:'pointer',background:alertOn?'rgba(74,222,128,0.1)':'rgba(255,255,255,0.04)',border:alertOn?'1px solid rgba(74,222,128,0.3)':'1px solid rgba(255,255,255,0.07)',color:alertOn?'#4ade80':'rgba(255,255,255,0.38)',fontFamily:'inherit'}}>{alertOn?'🔔 Alerts On':'🔔 Price Alerts'}</button>
+            </div>
+          </div>
+
+          <div style={{marginBottom:18,padding:'13px 16px',background:'linear-gradient(135deg,rgba(109,40,217,0.1),rgba(79,70,229,0.05))',border:'1px solid rgba(109,40,217,0.18)',borderRadius:11,display:'flex',alignItems:'center',gap:13}}>
+            <div style={{width:31,height:31,borderRadius:8,flexShrink:0,background:'linear-gradient(135deg,#6d28d9,#4f46e5)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:15}}>✦</div>
+            <div>
+              <div style={{fontSize:11.5,fontWeight:700,color:'#a78bfa',marginBottom:2}}>AI Price Intelligence</div>
+              <div style={{fontSize:11,color:'rgba(255,255,255,0.48)',lineHeight:1.5}}>MacBook Pro M3 is at its <strong style={{color:'rgba(255,255,255,0.8)'}}>lowest price in 90 days</strong> — $300 below MSRP. Dell XPS open-box = same performance, 20% less. <strong style={{color:'#D4AF37'}}>Best time to buy: Now.</strong></div>
+            </div>
+          </div>
+
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(255px,1fr))',gap:14}}>
+            {PRODUCTS.map(p=><ProductCard key={p.id} p={p} onBuy={setCheckout}/>)}
+          </div>
+        </main>
+
+        {/* RIGHT PANEL */}
+        <aside style={{width:268,flexShrink:0,borderLeft:'1px solid rgba(255,255,255,0.05)',overflowY:'auto',padding:'18px 14px',background:'linear-gradient(180deg,rgba(10,12,28,0.99),rgba(8,10,22,1))'}}>
+          <div style={{fontSize:9.5,color:'rgba(255,255,255,0.22)',textTransform:'uppercase',letterSpacing:'0.12em',marginBottom:13}}>AI Intelligence</div>
+
+          {/* Price Predictions */}
+          <div style={{marginBottom:11,padding:13,background:'rgba(212,175,55,0.05)',border:'1px solid rgba(212,175,55,0.14)',borderRadius:11}}>
+            <div style={{fontSize:11,fontWeight:700,color:'#D4AF37',marginBottom:9}}>📈 Price Predictions</div>
+            {[{n:'MacBook Pro M3',t:'↑ +$80 in 2wks',c:'#f87171'},{n:'Dell XPS 15',t:'↓ -$50 soon',c:'#4ade80'},{n:'Razer Blade 16',t:'— Stable',c:'rgba(255,255,255,0.35)'}].map((x,i)=>(
+              <div key={i} style={{display:'flex',justifyContent:'space-between',marginBottom:5,alignItems:'center'}}>
+                <span style={{fontSize:10.5,color:'rgba(255,255,255,0.5)',flex:1}}>{x.n}</span>
+                <span style={{fontSize:10,fontWeight:700,color:x.c}}>{x.t}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Best Time */}
+          <div style={{marginBottom:11,padding:13,background:'rgba(74,222,128,0.05)',border:'1px solid rgba(74,222,128,0.11)',borderRadius:11}}>
+            <div style={{fontSize:11,fontWeight:700,color:'#4ade80',marginBottom:7}}>⏰ Best Time to Buy</div>
+            <div style={{fontSize:11.5,color:'rgba(255,255,255,0.55)',lineHeight:1.6}}>Buy <strong style={{color:'#fff'}}>laptops now</strong> — back-to-school surplus is creating a dip. Prices expected to rise ~12% in 3 weeks.</div>
+          </div>
+
+          {/* Score bars */}
+          <div style={{marginBottom:11,padding:13,background:'rgba(255,255,255,0.025)',border:'1px solid rgba(255,255,255,0.07)',borderRadius:11}}>
+            <div style={{fontSize:11,fontWeight:700,color:'rgba(255,255,255,0.65)',marginBottom:10}}>⚖️ Quality vs Price</div>
+            {PRODUCTS.slice(0,4).map((p,i)=>(
+              <div key={i} style={{marginBottom:8}}>
+                <div style={{display:'flex',justifyContent:'space-between',marginBottom:3}}>
+                  <span style={{fontSize:10,color:'rgba(255,255,255,0.4)'}}>{p.brand}</span>
+                  <span style={{fontSize:10,fontWeight:700,color:'#D4AF37'}}>{p.score}</span>
+                </div>
+                <div style={{height:3,background:'rgba(255,255,255,0.07)',borderRadius:2,overflow:'hidden'}}>
+                  <div style={{height:'100%',width:`${p.score}%`,borderRadius:2,background:p.score>=90?'linear-gradient(90deg,#D4AF37,#f59e0b)':'linear-gradient(90deg,#60a5fa,#818cf8)'}}/>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Resale */}
+          <div style={{marginBottom:11,padding:13,background:'rgba(139,92,246,0.05)',border:'1px solid rgba(139,92,246,0.11)',borderRadius:11}}>
+            <div style={{fontSize:11,fontWeight:700,color:'#a78bfa',marginBottom:8}}>♻️ Resale Value (1yr)</div>
+            {PRODUCTS.slice(0,3).map((p,i)=>(
+              <div key={i} style={{display:'flex',justifyContent:'space-between',marginBottom:5}}>
+                <span style={{fontSize:11,color:'rgba(255,255,255,0.42)'}}>{p.brand}</span>
+                <span style={{fontSize:11,fontWeight:700,color:'#a78bfa'}}>{p.resale}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* AI Negotiation */}
+          <div style={{marginBottom:11,padding:13,background:'linear-gradient(135deg,rgba(212,175,55,0.07),rgba(212,175,55,0.02))',border:'1px solid rgba(212,175,55,0.18)',borderRadius:11}}>
+            <div style={{fontSize:11,fontWeight:700,color:'#D4AF37',marginBottom:5}}>🤝 AI Negotiation</div>
+            <div style={{fontSize:11,color:'rgba(255,255,255,0.46)',marginBottom:9,lineHeight:1.5}}>Let Sicero monitor prices & alert you the exact moment to buy.</div>
+            <button style={{width:'100%',padding:'8px',borderRadius:8,background:'linear-gradient(135deg,#D4AF37,#B8960C)',border:'none',color:'#0a0c1c',fontWeight:700,fontSize:11.5,cursor:'pointer',fontFamily:'inherit'}}>Enable for MacBook Pro →</button>
+          </div>
+
+          {/* New vs Used */}
+          <div style={{padding:13,background:'rgba(255,255,255,0.025)',border:'1px solid rgba(255,255,255,0.07)',borderRadius:11}}>
+            <div style={{fontSize:11,fontWeight:700,color:'rgba(255,255,255,0.65)',marginBottom:9}}>🆕 New vs Used</div>
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:7}}>
+              {[{l:'New',p:'$1,299',n:'Full warranty',c:'#4ade80'},{l:'Used',p:'$849',n:'Like new · 90d',c:'#60a5fa'}].map((o,i)=>(
+                <div key={i} style={{padding:9,borderRadius:8,textAlign:'center',background:'rgba(255,255,255,0.03)',border:`1px solid ${o.c}22`}}>
+                  <div style={{fontSize:9.5,color:o.c,fontWeight:700,marginBottom:2}}>{o.l}</div>
+                  <div style={{fontSize:14,fontWeight:800,color:'#fff'}}>{o.p}</div>
+                  <div style={{fontSize:9,color:'rgba(255,255,255,0.3)',marginTop:2}}>{o.n}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      {checkout&&<CheckoutModal p={checkout} onClose={()=>setCheckout(null)}/>}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
