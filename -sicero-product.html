@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MacBook Pro M3 — Sicero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Syne:wght@700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body,#root{min-height:100%;width:100%;}
+  body{background:#080a1a;font-family:'DM Sans',-apple-system,sans-serif;color:#fff;}
+  ::-webkit-scrollbar{width:4px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:rgba(212,175,55,0.3);border-radius:2px;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+  @keyframes shimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}
+  @keyframes slideRight{from{width:0}to{width:var(--w)}}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @keyframes popIn{0%{transform:scale(0.85);opacity:0}100%{transform:scale(1);opacity:1}}
+  @keyframes glow{0%,100%{box-shadow:0 0 20px rgba(212,175,55,0.15)}50%{box-shadow:0 0 40px rgba(212,175,55,0.35)}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState, useEffect, useRef} = React;
+
+/* ─── DATA ─────────────────────────────────────────────────── */
+const PRODUCT = {
+  name: "MacBook Pro M3 Pro",
+  subtitle: '14" · M3 Pro · 18GB · 512GB SSD',
+  brand: "Apple",
+  category: "Laptops",
+  images: [
+    "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=900&q=85",
+    "https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?w=900&q=85",
+    "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=900&q=85",
+    "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=900&q=85",
+  ],
+  siceroScore: 97,
+  aiVerdict: "Best-in-class performance for video editing, motion graphics, and creative work. The M3 Pro chip delivers up to 40% faster render times than its predecessor with 22-hour battery life.",
+  priceDropAlert: true,
+  lowestEver: true,
+};
+
+const LISTINGS = [
+  { store: "Amazon", badge: "Prime", logo: "🟠", price: 1299, orig: 1599, shipping: "Free", delivery: "Tomorrow", condition: "New", inStock: true, url: "#", highlight: true },
+  { store: "Best Buy", badge: "Open Box", logo: "🔵", price: 1049, orig: 1299, shipping: "Free", delivery: "2 days", condition: "Open Box", inStock: true, url: "#", highlight: false },
+  { store: "Walmart", badge: "Marketplace", logo: "🟡", price: 1189, orig: 1599, shipping: "Free", delivery: "3 days", condition: "New", inStock: true, url: "#", highlight: false },
+  { store: "B&H Photo", badge: "Authorized", logo: "⚫", price: 1279, orig: 1599, shipping: "$12", delivery: "2 days", condition: "New", inStock: true, url: "#", highlight: false },
+  { store: "Costco", badge: "Member Price", logo: "🔴", price: 1249, orig: 1599, shipping: "Free", delivery: "5 days", condition: "New", inStock: false, url: "#", highlight: false },
+];
+
+const REVIEWS = [
+  { author: "Sarah K.", avatar: "SK", rating: 5, date: "Mar 8, 2026", title: "Absolute beast for video editing", body: "Edited an entire feature film on this machine. DaVinci Resolve runs flawlessly, exports in half the time of my old Intel Mac. Battery is genuinely incredible.", verified: true, helpful: 247 },
+  { author: "Marcus T.", avatar: "MT", rating: 5, date: "Feb 22, 2026", title: "Worth every penny", body: "Coming from a Windows laptop, the build quality alone is worth the premium. The display is stunning and the keyboard is the best I've ever typed on.", verified: true, helpful: 183 },
+  { author: "Priya R.", avatar: "PR", rating: 4, date: "Feb 10, 2026", title: "Nearly perfect — minor gripes", body: "Performance is unreal. Knocked one star because only two Thunderbolt ports on the base model. Other than that, best laptop I've owned in 15 years.", verified: true, helpful: 94 },
+  { author: "James L.", avatar: "JL", rating: 5, date: "Jan 30, 2026", title: "The M3 Pro chip is a game-changer", body: "Running 3D renders that used to take hours in under 20 minutes. This chip is genuinely in a different league. Highly recommend for any creative professional.", verified: false, helpful: 71 },
+];
+
+const AI_INSIGHTS = [
+  { icon: "📉", label: "Price History", value: "Lowest price in 90 days", color: "#4ade80", sub: "$300 below MSRP — was $1,599" },
+  { icon: "⏰", label: "Best Time to Buy", value: "Buy Now", color: "#D4AF37", sub: "Back-to-school surplus ends in 2 weeks" },
+  { icon: "♻️", label: "Resale Value", value: "85% after 1 year", color: "#a78bfa", sub: "Apple retains value better than competitors" },
+  { icon: "📈", label: "Price Prediction", value: "+$80 in 14 days", color: "#f87171", sub: "Seasonal demand spike expected" },
+];
+
+const SPECS = [
+  ["Chip", "Apple M3 Pro (12-core CPU, 18-core GPU)"],
+  ["Memory", "18GB unified memory"],
+  ["Storage", "512GB SSD"],
+  ["Display", '14.2" Liquid Retina XDR · 3024×1964 · 120Hz'],
+  ["Battery", "Up to 22 hours"],
+  ["Ports", "3× Thunderbolt 4, HDMI, SD Card, MagSafe 3"],
+  ["Weight", "3.5 lbs (1.61 kg)"],
+  ["OS", "macOS Sequoia"],
+];
+
+const ALT_PRODUCTS = [
+  { name: "MacBook Pro M3 Max 16\"", price: 2499, score: 94, img: "https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?w=200&q=70", label: "More Power" },
+  { name: "Dell XPS 15 OLED", price: 1049, score: 91, img: "https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=200&q=70", label: "Best Value" },
+  { name: "Razer Blade 15", price: 1799, score: 88, img: "https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=200&q=70", label: "Best for Gaming" },
+];
+
+/* ─── COMPONENTS ────────────────────────────────────────────── */
+function Stars({rating, size=13}){
+  return (
+    <span style={{display:'inline-flex',gap:1}}>
+      {[1,2,3,4,5].map(i=>(
+        <span key={i} style={{fontSize:size,color:i<=Math.round(rating)?'#D4AF37':'rgba(255,255,255,0.18)'}}>★</span>
+      ))}
+    </span>
+  );
+}
+
+function ScoreRing({score, size=72}){
+  const r=(size/2)-6, circ=2*Math.PI*r, dash=(score/100)*circ;
+  const color=score>=90?'#D4AF37':score>=80?'#60a5fa':'#4ade80';
+  return (
+    <div style={{position:'relative',width:size,height:size,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
+      <svg width={size} height={size} style={{position:'absolute',transform:'rotate(-90deg)'}}>
+        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="4"/>
+        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth="4"
+          strokeDasharray={`${dash} ${circ}`} strokeLinecap="round"
+          style={{filter:`drop-shadow(0 0 6px ${color}90)`,transition:'stroke-dasharray 1s ease'}}/>
+      </svg>
+      <div style={{textAlign:'center',position:'relative'}}>
+        <div style={{fontFamily:"'Syne',sans-serif",fontSize:size*0.28,fontWeight:800,color,lineHeight:1}}>{score}</div>
+        <div style={{fontSize:size*0.12,color:'rgba(255,255,255,0.35)',marginTop:2,textTransform:'uppercase',letterSpacing:'0.06em'}}>Score</div>
+      </div>
+    </div>
+  );
+}
+
+function PriceBar({listings}){
+  const min=Math.min(...listings.map(l=>l.price));
+  const max=Math.max(...listings.map(l=>l.price))+50;
+  return (
+    <div style={{display:'flex',flexDirection:'column',gap:8}}>
+      {listings.map((l,i)=>{
+        const pct=((l.price-min)/(max-min))*60+5;
+        return (
+          <div key={i} style={{display:'flex',alignItems:'center',gap:10,opacity:l.inStock?1:0.45}}>
+            <div style={{width:80,fontSize:11,color:'rgba(255,255,255,0.5)',flexShrink:0}}>{l.logo} {l.store}</div>
+            <div style={{flex:1,height:6,background:'rgba(255,255,255,0.06)',borderRadius:3,overflow:'hidden'}}>
+              <div style={{height:'100%',width:`${100-pct}%`,background:i===0?'linear-gradient(90deg,#D4AF37,#f59e0b)':'rgba(255,255,255,0.2)',borderRadius:3,transition:'width 1.2s ease'}}/>
+            </div>
+            <div style={{fontSize:12,fontWeight:700,color:l.price===min?'#D4AF37':'rgba(255,255,255,0.6)',width:54,textAlign:'right',flexShrink:0}}>${l.price.toLocaleString()}</div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function CheckoutModal({listing, onClose}){
+  const [step,setStep]=useState(0);
+  const steps=[
+    {label:'Authenticating listing',icon:'🔍'},
+    {label:'Finding cheapest fulfillment route',icon:'🗺'},
+    {label:'Placing order on '+listing.store,icon:'🛒'},
+    {label:'Order confirmed!',icon:'✅'},
+  ];
+  useEffect(()=>{
+    if(step<3){const t=setTimeout(()=>setStep(s=>s+1),900);return()=>clearTimeout(t);}
+  },[step]);
+  return (
+    <div style={{position:'fixed',inset:0,zIndex:200,background:'rgba(4,6,18,0.92)',backdropFilter:'blur(18px)',display:'flex',alignItems:'center',justifyContent:'center',animation:'fadeIn 0.2s ease'}}>
+      <div style={{background:'linear-gradient(145deg,rgba(16,18,42,0.99),rgba(10,12,28,0.99))',border:'1px solid rgba(212,175,55,0.22)',borderRadius:22,padding:'36px 40px',width:460,maxWidth:'92vw',boxShadow:'0 50px 120px rgba(0,0,0,0.7)',animation:'popIn 0.3s ease'}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:28}}>
+          <div>
+            <div style={{fontSize:10,color:'rgba(212,175,55,0.65)',textTransform:'uppercase',letterSpacing:'0.14em',marginBottom:5,fontFamily:"'DM Mono',monospace"}}>Sicero Checkout</div>
+            <div style={{fontFamily:"'Syne',sans-serif",fontSize:20,fontWeight:800,color:'#fff',marginBottom:3}}>{PRODUCT.name}</div>
+            <div style={{display:'flex',alignItems:'center',gap:10}}>
+              <span style={{fontSize:26,fontWeight:800,color:'#D4AF37'}}>${listing.price.toLocaleString()}</span>
+              <span style={{fontSize:13,color:'rgba(255,255,255,0.3)',textDecoration:'line-through'}}>${listing.orig.toLocaleString()}</span>
+              <span style={{fontSize:11,color:'#4ade80',fontWeight:700,background:'rgba(74,222,128,0.1)',padding:'2px 7px',borderRadius:5}}>Save ${listing.orig-listing.price}</span>
+            </div>
+          </div>
+          <button onClick={onClose} style={{background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.1)',color:'rgba(255,255,255,0.45)',cursor:'pointer',borderRadius:9,padding:'7px 12px',fontSize:15,fontFamily:'inherit',transition:'all 0.2s'}}
+            onMouseEnter={e=>{e.target.style.background='rgba(255,255,255,0.1)';e.target.style.color='#fff';}}
+            onMouseLeave={e=>{e.target.style.background='rgba(255,255,255,0.06)';e.target.style.color='rgba(255,255,255,0.45)';}}>✕</button>
+        </div>
+
+        <div style={{background:'rgba(255,255,255,0.02)',border:'1px solid rgba(255,255,255,0.06)',borderRadius:12,padding:'14px 16px',marginBottom:24,display:'flex',justifyContent:'space-between',fontSize:12,color:'rgba(255,255,255,0.45)'}}>
+          <span>Fulfilling from <strong style={{color:'rgba(255,255,255,0.75)'}}>{listing.store}</strong></span>
+          <span>Delivery: <strong style={{color:'rgba(255,255,255,0.75)'}}>{listing.delivery}</strong></span>
+          <span>{listing.shipping==='Free'?<span style={{color:'#4ade80'}}>Free shipping</span>:<span>+{listing.shipping}</span>}</span>
+        </div>
+
+        <div style={{marginBottom:24}}>
+          {steps.map((s,i)=>(
+            <div key={i} style={{display:'flex',alignItems:'center',gap:13,marginBottom:14,transition:'opacity 0.4s',opacity:i<=step?1:0.25}}>
+              <div style={{width:32,height:32,borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,flexShrink:0,
+                background:i<step?'linear-gradient(135deg,#D4AF37,#B8960C)':i===step?'rgba(212,175,55,0.12)':'rgba(255,255,255,0.04)',
+                border:i===step?'1px solid rgba(212,175,55,0.45)':i<step?'none':'1px solid rgba(255,255,255,0.08)',
+                boxShadow:i<step?'0 0 12px rgba(212,175,55,0.3)':'none',
+                transition:'all 0.5s ease',
+              }}>
+                {i<step?'✓':i===step?<span style={{fontSize:10,animation:'pulse 1s infinite',display:'inline-block'}}>●</span>:i+1}
+              </div>
+              <div>
+                <div style={{fontSize:13,fontWeight:i===step?600:400,color:i<step?'#4ade80':i===step?'#fff':'rgba(255,255,255,0.3)',transition:'color 0.3s'}}>{s.label}</div>
+                {i===step&&step<3&&<div style={{fontSize:10,color:'rgba(255,255,255,0.3)',marginTop:2,animation:'pulse 1.5s infinite'}}>Processing…</div>}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {step===3&&(
+          <div style={{background:'linear-gradient(135deg,rgba(74,222,128,0.08),rgba(74,222,128,0.04))',border:'1px solid rgba(74,222,128,0.2)',borderRadius:14,padding:'18px 20px',textAlign:'center',animation:'popIn 0.4s ease'}}>
+            <div style={{fontSize:32,marginBottom:8}}>🎉</div>
+            <div style={{fontSize:16,fontWeight:700,color:'#4ade80',marginBottom:5}}>Order Placed Successfully</div>
+            <div style={{fontSize:12,color:'rgba(255,255,255,0.4)',lineHeight:1.6}}>Sicero fulfilled your order from <strong style={{color:'rgba(255,255,255,0.6)'}}>{listing.store}</strong>.<br/>Estimated delivery: <strong style={{color:'rgba(255,255,255,0.6)'}}>{listing.delivery}</strong>. Check your email for tracking.</div>
+          </div>
+        )}
+
+        <div style={{marginTop:20,paddingTop:14,borderTop:'1px solid rgba(255,255,255,0.05)',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+          <div style={{fontSize:10.5,color:'rgba(255,255,255,0.2)',fontFamily:"'DM Mono',monospace"}}>Sicero earns a small margin · You get the best price</div>
+          <div style={{fontSize:10.5,color:'rgba(212,175,55,0.45)'}}>🔒 Secured</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── MAIN PAGE ─────────────────────────────────────────────── */
+function App(){
+  const [activeImg, setActiveImg]=useState(0);
+  const [activeTab, setActiveTab]=useState('overview');
+  const [checkout, setCheckout]=useState(null);
+  const [alertSet, setAlertSet]=useState(false);
+  const [comparing, setComparing]=useState(false);
+  const [aiExpanded, setAiExpanded]=useState(false);
+  const [activeReviewSort, setActiveReviewSort]=useState('Most Helpful');
+
+  const bestListing = LISTINGS[0];
+  const savings = bestListing.orig - bestListing.price;
+
+  return (
+    <div style={{minHeight:'100vh',background:'#080a1a'}}>
+
+      {/* ── NAV ── */}
+      <header style={{position:'sticky',top:0,zIndex:100,display:'flex',alignItems:'center',justifyContent:'space-between',padding:'0 32px',height:58,background:'rgba(8,10,26,0.97)',backdropFilter:'blur(20px)',borderBottom:'1px solid rgba(255,255,255,0.05)'}}>
+        <div style={{display:'flex',alignItems:'center',gap:10}}>
+          <div style={{width:30,height:30,borderRadius:8,background:'linear-gradient(135deg,#7c3aed,#4f46e5)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14}}>✦</div>
+          <span style={{fontFamily:"'Syne',sans-serif",fontWeight:800,fontSize:18}}>Sicero</span>
+        </div>
+
+        {/* Breadcrumb */}
+        <div style={{display:'flex',alignItems:'center',gap:6,fontSize:12,color:'rgba(255,255,255,0.35)'}}>
+          <a href="#" style={{color:'rgba(255,255,255,0.35)',textDecoration:'none',transition:'color 0.2s'}} onMouseEnter={e=>e.target.style.color='#D4AF37'} onMouseLeave={e=>e.target.style.color='rgba(255,255,255,0.35)'}>Marketplace</a>
+          <span>›</span>
+          <a href="#" style={{color:'rgba(255,255,255,0.35)',textDecoration:'none',transition:'color 0.2s'}} onMouseEnter={e=>e.target.style.color='#D4AF37'} onMouseLeave={e=>e.target.style.color='rgba(255,255,255,0.35)'}>Laptops</a>
+          <span>›</span>
+          <span style={{color:'rgba(255,255,255,0.65)'}}>MacBook Pro M3 Pro</span>
+        </div>
+
+        <div style={{display:'flex',gap:10,alignItems:'center'}}>
+          <button onClick={()=>setAlertSet(a=>!a)} style={{padding:'7px 14px',borderRadius:9,fontSize:12,fontWeight:600,cursor:'pointer',background:alertSet?'rgba(212,175,55,0.12)':'rgba(255,255,255,0.04)',border:alertSet?'1px solid rgba(212,175,55,0.3)':'1px solid rgba(255,255,255,0.08)',color:alertSet?'#D4AF37':'rgba(255,255,255,0.45)',fontFamily:'inherit',transition:'all 0.2s'}}>
+            {alertSet?'🔔 Alert Set':'🔔 Price Alert'}
+          </button>
+          <button style={{padding:'7px 16px',background:'linear-gradient(135deg,#D4AF37,#B8960C)',border:'none',borderRadius:9,color:'#0a0c1c',fontWeight:700,fontSize:12,cursor:'pointer',fontFamily:'inherit'}}>Sign In</button>
+        </div>
+      </header>
+
+      {/* ── BODY ── */}
+      <div style={{maxWidth:1280,margin:'0 auto',padding:'32px 28px'}}>
+
+        {/* ── TOP SECTION: Image + Buy Panel ── */}
+        <div style={{display:'grid',gridTemplateColumns:'1fr 420px',gap:32,marginBottom:40,animation:'fadeUp 0.5s ease'}}>
+
+          {/* Left: Images + AI Verdict */}
+          <div>
+            {/* Main Image */}
+            <div style={{position:'relative',borderRadius:20,overflow:'hidden',background:'linear-gradient(145deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01))',border:'1px solid rgba(255,255,255,0.07)',marginBottom:12,aspectRatio:'16/10'}}>
+              <img src={PRODUCT.images[activeImg]} alt={PRODUCT.name}
+                style={{width:'100%',height:'100%',objectFit:'cover',transition:'opacity 0.35s ease'}}
+                key={activeImg}/>
+              {/* Gradient overlay at bottom */}
+              <div style={{position:'absolute',inset:0,background:'linear-gradient(to top,rgba(8,10,26,0.6) 0%,transparent 40%)'}}/>
+              {/* Badges */}
+              <div style={{position:'absolute',top:16,left:16,display:'flex',gap:8}}>
+                <div style={{padding:'4px 10px',borderRadius:7,background:'rgba(212,175,55,0.15)',border:'1px solid rgba(212,175,55,0.35)',fontSize:10,fontWeight:700,color:'#D4AF37',textTransform:'uppercase',letterSpacing:'0.06em',backdropFilter:'blur(8px)'}}>Best Value</div>
+                <div style={{padding:'4px 10px',borderRadius:7,background:'rgba(74,222,128,0.12)',border:'1px solid rgba(74,222,128,0.25)',fontSize:10,fontWeight:700,color:'#4ade80',textTransform:'uppercase',letterSpacing:'0.06em',backdropFilter:'blur(8px)'}}>Lowest in 90 Days</div>
+              </div>
+              {/* Score overlay */}
+              <div style={{position:'absolute',bottom:16,right:16}}>
+                <ScoreRing score={PRODUCT.siceroScore} size={64}/>
+              </div>
+            </div>
+
+            {/* Thumbnail strip */}
+            <div style={{display:'flex',gap:10,marginBottom:24}}>
+              {PRODUCT.images.map((img,i)=>(
+                <div key={i} onClick={()=>setActiveImg(i)} style={{
+                  width:72,height:54,borderRadius:10,overflow:'hidden',cursor:'pointer',flexShrink:0,
+                  border:activeImg===i?'2px solid #D4AF37':'2px solid rgba(255,255,255,0.07)',
+                  transition:'all 0.2s',opacity:activeImg===i?1:0.55,
+                  transform:activeImg===i?'scale(1.04)':'scale(1)',
+                }}>
+                  <img src={img} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}}/>
+                </div>
+              ))}
+            </div>
+
+            {/* AI Verdict Card */}
+            <div style={{padding:'20px 22px',background:'linear-gradient(135deg,rgba(109,40,217,0.1),rgba(79,70,229,0.05))',border:'1px solid rgba(109,40,217,0.2)',borderRadius:16,marginBottom:24}}>
+              <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:12}}>
+                <div style={{width:28,height:28,borderRadius:7,background:'linear-gradient(135deg,#6d28d9,#4f46e5)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,flexShrink:0}}>✦</div>
+                <div style={{fontSize:12,fontWeight:700,color:'#a78bfa',letterSpacing:'0.04em'}}>Sicero AI Verdict</div>
+                <div style={{marginLeft:'auto',padding:'2px 8px',borderRadius:5,background:'rgba(212,175,55,0.1)',border:'1px solid rgba(212,175,55,0.2)',fontSize:9.5,color:'#D4AF37',fontWeight:600}}>Analyzed 847 reviews</div>
+              </div>
+              <p style={{fontSize:13.5,lineHeight:1.75,color:'rgba(255,255,255,0.72)',fontStyle:'italic'}}>
+                "{PRODUCT.aiVerdict}"
+              </p>
+              <div style={{marginTop:14,display:'flex',gap:8,flexWrap:'wrap'}}>
+                {['✓ Best for video editing','✓ Apple silicon advantage','✓ 22hr battery','✓ Premium resale value'].map((t,i)=>(
+                  <span key={i} style={{padding:'3px 10px',borderRadius:6,background:'rgba(109,40,217,0.1)',border:'1px solid rgba(109,40,217,0.18)',fontSize:11,color:'rgba(255,255,255,0.55)'}}>{t}</span>
+                ))}
+              </div>
+            </div>
+
+            {/* AI Insight grid */}
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+              {AI_INSIGHTS.map((ins,i)=>(
+                <div key={i} style={{padding:'14px 16px',borderRadius:12,background:'rgba(255,255,255,0.025)',border:'1px solid rgba(255,255,255,0.07)',transition:'border-color 0.2s',cursor:'default'}}
+                  onMouseEnter={e=>e.currentTarget.style.borderColor='rgba(212,175,55,0.2)'}
+                  onMouseLeave={e=>e.currentTarget.style.borderColor='rgba(255,255,255,0.07)'}>
+                  <div style={{fontSize:11,color:'rgba(255,255,255,0.35)',marginBottom:4}}>{ins.icon} {ins.label}</div>
+                  <div style={{fontSize:14,fontWeight:700,color:ins.color,marginBottom:3}}>{ins.value}</div>
+                  <div style={{fontSize:10.5,color:'rgba(255,255,255,0.35)',lineHeight:1.4}}>{ins.sub}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Right: Buy Panel */}
+          <div style={{position:'sticky',top:76}}>
+            <div style={{background:'linear-gradient(145deg,rgba(14,16,38,0.98),rgba(10,12,28,0.98))',border:'1px solid rgba(255,255,255,0.08)',borderRadius:20,overflow:'hidden',boxShadow:'0 24px 80px rgba(0,0,0,0.5)',animation:'glow 4s ease infinite'}}>
+
+              {/* Product title in panel */}
+              <div style={{padding:'22px 22px 16px'}}>
+                <div style={{fontSize:10,color:'rgba(255,255,255,0.3)',textTransform:'uppercase',letterSpacing:'0.12em',marginBottom:5,fontFamily:"'DM Mono',monospace"}}>{PRODUCT.brand} · {PRODUCT.category}</div>
+                <h1 style={{fontFamily:"'Syne',sans-serif",fontSize:22,fontWeight:800,lineHeight:1.2,marginBottom:5}}>{PRODUCT.name}</h1>
+                <div style={{fontSize:12.5,color:'rgba(255,255,255,0.4)',marginBottom:12}}>{PRODUCT.subtitle}</div>
+
+                <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:4}}>
+                  <Stars rating={4.8} size={14}/>
+                  <span style={{fontSize:12,color:'rgba(255,255,255,0.5)'}}>4.8 <span style={{color:'rgba(255,255,255,0.3)'}}>(2,100 reviews)</span></span>
+                </div>
+              </div>
+
+              {/* Best price highlight */}
+              <div style={{margin:'0 16px',padding:'16px',borderRadius:14,background:'linear-gradient(135deg,rgba(212,175,55,0.1),rgba(212,175,55,0.04))',border:'1px solid rgba(212,175,55,0.2)',marginBottom:16}}>
+                <div style={{fontSize:10,color:'rgba(212,175,55,0.65)',textTransform:'uppercase',letterSpacing:'0.1em',marginBottom:6,fontFamily:"'DM Mono',monospace"}}>Best Price · Amazon Prime</div>
+                <div style={{display:'flex',alignItems:'baseline',gap:10,marginBottom:6}}>
+                  <span style={{fontFamily:"'Syne',sans-serif",fontSize:34,fontWeight:800,color:'#D4AF37'}}>${bestListing.price.toLocaleString()}</span>
+                  <span style={{fontSize:15,color:'rgba(255,255,255,0.3)',textDecoration:'line-through'}}>${bestListing.orig.toLocaleString()}</span>
+                </div>
+                <div style={{display:'flex',gap:8,alignItems:'center'}}>
+                  <span style={{fontSize:11,fontWeight:700,color:'#4ade80',background:'rgba(74,222,128,0.1)',padding:'2px 8px',borderRadius:5}}>Save ${savings}</span>
+                  <span style={{fontSize:11,color:'rgba(255,255,255,0.4)'}}>· Free delivery tomorrow</span>
+                </div>
+              </div>
+
+              {/* CTA buttons */}
+              <div style={{padding:'0 16px 16px',display:'flex',flexDirection:'column',gap:10}}>
+                <button onClick={()=>setCheckout(bestListing)} style={{width:'100%',padding:'14px',borderRadius:12,background:'linear-gradient(135deg,#D4AF37,#B8960C)',border:'none',color:'#0a0c1c',fontWeight:800,fontSize:15,cursor:'pointer',fontFamily:"'Syne',sans-serif",letterSpacing:'0.03em',boxShadow:'0 8px 28px rgba(212,175,55,0.3)',transition:'all 0.25s',display:'flex',alignItems:'center',justifyContent:'center',gap:8}}
+                  onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-1px)';e.currentTarget.style.boxShadow='0 12px 36px rgba(212,175,55,0.4)';}}
+                  onMouseLeave={e=>{e.currentTarget.style.transform='none';e.currentTarget.style.boxShadow='0 8px 28px rgba(212,175,55,0.3)';}}>
+                  Buy Now — ${bestListing.price.toLocaleString()} <span style={{fontSize:12,opacity:0.7,fontFamily:"'DM Sans',sans-serif",fontWeight:600}}>via Sicero</span>
+                </button>
+                <button onClick={()=>setAlertSet(a=>!a)} style={{width:'100%',padding:'11px',borderRadius:12,background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.1)',color:'rgba(255,255,255,0.7)',fontWeight:600,fontSize:13,cursor:'pointer',fontFamily:'inherit',transition:'all 0.2s',display:'flex',alignItems:'center',justifyContent:'center',gap:6}}
+                  onMouseEnter={e=>{e.currentTarget.style.borderColor='rgba(212,175,55,0.3)';e.currentTarget.style.color='#D4AF37';}}
+                  onMouseLeave={e=>{e.currentTarget.style.borderColor='rgba(255,255,255,0.1)';e.currentTarget.style.color='rgba(255,255,255,0.7)';}}>
+                  {alertSet?'🔔 Watching price — tap to cancel':'🔔 Watch Price · Alert me when lower'}
+                </button>
+              </div>
+
+              {/* Trust signals */}
+              <div style={{margin:'0 16px 16px',display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:6}}>
+                {[['🔒','Secure','Checkout'],['🔄','Free','Returns'],['🤝','Sicero','Guarantee']].map(([icon,l1,l2],i)=>(
+                  <div key={i} style={{padding:'8px 6px',borderRadius:9,background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.06)',textAlign:'center'}}>
+                    <div style={{fontSize:16,marginBottom:2}}>{icon}</div>
+                    <div style={{fontSize:9.5,color:'rgba(255,255,255,0.55)',lineHeight:1.3,fontWeight:600}}>{l1}<br/>{l2}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Divider */}
+              <div style={{height:'1px',background:'rgba(255,255,255,0.06)',margin:'0 0 0 0'}}/>
+
+              {/* Price comparison mini */}
+              <div style={{padding:'16px 18px 18px'}}>
+                <div style={{fontSize:10.5,color:'rgba(255,255,255,0.3)',textTransform:'uppercase',letterSpacing:'0.1em',marginBottom:12,fontFamily:"'DM Mono',monospace"}}>Price across marketplaces</div>
+                <PriceBar listings={LISTINGS}/>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── TABS ── */}
+        <div style={{borderBottom:'1px solid rgba(255,255,255,0.07)',marginBottom:32,display:'flex',gap:0}}>
+          {['overview','prices','reviews','specs','alternatives'].map(tab=>(
+            <button key={tab} onClick={()=>setActiveTab(tab)} style={{
+              padding:'12px 22px',fontSize:13,fontWeight:600,cursor:'pointer',border:'none',
+              background:'transparent',fontFamily:'inherit',textTransform:'capitalize',letterSpacing:'0.03em',
+              color:activeTab===tab?'#D4AF37':'rgba(255,255,255,0.38)',
+              borderBottom:activeTab===tab?'2px solid #D4AF37':'2px solid transparent',
+              transition:'all 0.2s',marginBottom:'-1px',
+            }}
+            onMouseEnter={e=>{if(activeTab!==tab)e.target.style.color='rgba(255,255,255,0.7)';}}
+            onMouseLeave={e=>{if(activeTab!==tab)e.target.style.color='rgba(255,255,255,0.38)';}}>
+              {tab}
+            </button>
+          ))}
+        </div>
+
+        {/* ── TAB CONTENT ── */}
+        <div style={{animation:'fadeUp 0.35s ease'}}>
+
+          {/* OVERVIEW */}
+          {activeTab==='overview'&&(
+            <div style={{display:'grid',gridTemplateColumns:'1fr 340px',gap:28}}>
+              <div>
+                <h2 style={{fontFamily:"'Syne',sans-serif",fontSize:17,fontWeight:800,marginBottom:18,color:'rgba(255,255,255,0.9)'}}>About this product</h2>
+                <p style={{fontSize:14,lineHeight:1.9,color:'rgba(255,255,255,0.6)',marginBottom:20}}>
+                  The MacBook Pro with M3 Pro chip delivers unprecedented performance for professional workflows. Whether you're cutting 8K video in Final Cut Pro, rendering complex 3D scenes, or running machine learning models, the M3 Pro handles it without breaking a sweat — or draining your battery.
+                </p>
+                <p style={{fontSize:14,lineHeight:1.9,color:'rgba(255,255,255,0.6)',marginBottom:24}}>
+                  The stunning 14.2-inch Liquid Retina XDR display features ProMotion adaptive refresh rate up to 120Hz, 1600 nits peak brightness, and support for over one billion colors — making it the finest laptop display ever shipped.
+                </p>
+                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+                  {[
+                    {icon:'⚡',title:'M3 Pro Chip',desc:'12-core CPU delivering pro-level performance'},
+                    {icon:'🖥',title:'XDR Display',desc:'120Hz ProMotion · 1600 nits peak brightness'},
+                    {icon:'🔋',title:'22-Hr Battery',desc:'Longest battery life in any Mac laptop'},
+                    {icon:'📡',title:'Connectivity',desc:'Thunderbolt 4 · HDMI 2.1 · Wi-Fi 6E'},
+                  ].map((f,i)=>(
+                    <div key={i} style={{padding:'16px',borderRadius:12,background:'rgba(255,255,255,0.025)',border:'1px solid rgba(255,255,255,0.07)'}}>
+                      <div style={{fontSize:20,marginBottom:6}}>{f.icon}</div>
+                      <div style={{fontSize:13,fontWeight:700,color:'rgba(255,255,255,0.85)',marginBottom:3}}>{f.title}</div>
+                      <div style={{fontSize:11.5,color:'rgba(255,255,255,0.4)',lineHeight:1.5}}>{f.desc}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <div style={{padding:'20px',borderRadius:14,background:'rgba(255,255,255,0.025)',border:'1px solid rgba(255,255,255,0.07)',marginBottom:16}}>
+                  <div style={{fontSize:11,color:'rgba(255,255,255,0.3)',textTransform:'uppercase',letterSpacing:'0.1em',marginBottom:14,fontFamily:"'DM Mono',monospace"}}>Quick Specs</div>
+                  {SPECS.slice(0,5).map(([k,v],i)=>(
+                    <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'8px 0',borderBottom:i<4?'1px solid rgba(255,255,255,0.05)':'none',gap:12}}>
+                      <span style={{fontSize:12,color:'rgba(255,255,255,0.38)',flexShrink:0}}>{k}</span>
+                      <span style={{fontSize:12,color:'rgba(255,255,255,0.7)',textAlign:'right'}}>{v}</span>
+                    </div>
+                  ))}
+                </div>
+                <div style={{padding:'16px 18px',borderRadius:14,background:'linear-gradient(135deg,rgba(212,175,55,0.07),rgba(212,175,55,0.02))',border:'1px solid rgba(212,175,55,0.16)'}}>
+                  <div style={{fontSize:11.5,fontWeight:700,color:'#D4AF37',marginBottom:6}}>🤝 Sicero AI Negotiation</div>
+                  <div style={{fontSize:12,color:'rgba(255,255,255,0.45)',lineHeight:1.6,marginBottom:10}}>Enable Sicero to automatically purchase when the price drops to your target.</div>
+                  <div style={{display:'flex',gap:8,alignItems:'center',marginBottom:10}}>
+                    <span style={{fontSize:12,color:'rgba(255,255,255,0.4)'}}>Target price:</span>
+                    <div style={{flex:1,padding:'6px 10px',borderRadius:8,background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.1)',fontSize:13,fontWeight:700,color:'#fff',fontFamily:"'DM Mono',monospace"}}>$1,199</div>
+                  </div>
+                  <button style={{width:'100%',padding:'9px',borderRadius:9,background:'linear-gradient(135deg,#D4AF37,#B8960C)',border:'none',color:'#0a0c1c',fontWeight:700,fontSize:12,cursor:'pointer',fontFamily:'inherit'}}>Set Auto-Buy Target →</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* PRICES */}
+          {activeTab==='prices'&&(
+            <div>
+              <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:20}}>
+                <h2 style={{fontFamily:"'Syne',sans-serif",fontSize:17,fontWeight:800}}>All Prices & Listings</h2>
+                <div style={{fontSize:12,color:'rgba(255,255,255,0.3)',fontFamily:"'DM Mono',monospace"}}>Updated 2 min ago</div>
+              </div>
+              <div style={{display:'flex',flexDirection:'column',gap:10}}>
+                {LISTINGS.map((l,i)=>(
+                  <div key={i} style={{
+                    display:'grid',gridTemplateColumns:'180px 1fr auto auto auto',alignItems:'center',gap:18,
+                    padding:'18px 22px',borderRadius:14,
+                    background:l.highlight?'linear-gradient(135deg,rgba(212,175,55,0.07),rgba(212,175,55,0.02))':'rgba(255,255,255,0.025)',
+                    border:l.highlight?'1px solid rgba(212,175,55,0.25)':'1px solid rgba(255,255,255,0.07)',
+                    opacity:l.inStock?1:0.5,transition:'border-color 0.2s,transform 0.2s',
+                  }}
+                  onMouseEnter={e=>{if(!l.highlight){e.currentTarget.style.borderColor='rgba(255,255,255,0.14)';e.currentTarget.style.transform='translateY(-1px)';}}}
+                  onMouseLeave={e=>{if(!l.highlight){e.currentTarget.style.borderColor='rgba(255,255,255,0.07)';e.currentTarget.style.transform='none';}}}>
+                    <div style={{display:'flex',alignItems:'center',gap:10}}>
+                      <span style={{fontSize:20}}>{l.logo}</span>
+                      <div>
+                        <div style={{fontSize:13,fontWeight:700,color:'rgba(255,255,255,0.85)'}}>{l.store}</div>
+                        <div style={{fontSize:10,color:'rgba(255,255,255,0.3)'}}>{l.badge}</div>
+                      </div>
+                    </div>
+                    <div style={{display:'flex',alignItems:'center',gap:8}}>
+                      {l.highlight&&<span style={{padding:'2px 8px',borderRadius:5,background:'rgba(212,175,55,0.12)',border:'1px solid rgba(212,175,55,0.25)',fontSize:10,fontWeight:700,color:'#D4AF37'}}>Best Price</span>}
+                      <span style={{fontSize:11,color:l.inStock?'#4ade80':'#f87171',fontWeight:600}}>{l.inStock?'● In Stock':'● Out of Stock'}</span>
+                      <span style={{fontSize:11,color:'rgba(255,255,255,0.35)'}}>{l.condition}</span>
+                    </div>
+                    <div style={{textAlign:'center'}}>
+                      <div style={{fontSize:11,color:'rgba(255,255,255,0.35)',marginBottom:2}}>Delivery</div>
+                      <div style={{fontSize:13,fontWeight:600,color:'rgba(255,255,255,0.75)'}}>{l.delivery}</div>
+                    </div>
+                    <div style={{textAlign:'center'}}>
+                      <div style={{fontSize:11,color:'rgba(255,255,255,0.35)',marginBottom:2}}>Shipping</div>
+                      <div style={{fontSize:13,fontWeight:600,color:l.shipping==='Free'?'#4ade80':'rgba(255,255,255,0.75)'}}>{l.shipping}</div>
+                    </div>
+                    <div style={{display:'flex',alignItems:'center',gap:10}}>
+                      <div style={{textAlign:'right'}}>
+                        <div style={{fontSize:22,fontWeight:800,color:l.highlight?'#D4AF37':'rgba(255,255,255,0.85)',fontFamily:"'Syne',sans-serif"}}>${l.price.toLocaleString()}</div>
+                        <div style={{fontSize:11,color:'rgba(255,255,255,0.25)',textDecoration:'line-through'}}>${l.orig.toLocaleString()}</div>
+                      </div>
+                      {l.inStock&&<button onClick={()=>setCheckout(l)} style={{padding:'9px 16px',borderRadius:10,background:l.highlight?'linear-gradient(135deg,#D4AF37,#B8960C)':'rgba(255,255,255,0.07)',border:l.highlight?'none':'1px solid rgba(255,255,255,0.12)',color:l.highlight?'#0a0c1c':'rgba(255,255,255,0.7)',fontWeight:700,fontSize:12.5,cursor:'pointer',fontFamily:'inherit',whiteSpace:'nowrap',transition:'all 0.2s'}}
+                        onMouseEnter={e=>{if(!l.highlight){e.currentTarget.style.background='rgba(255,255,255,0.12)';e.currentTarget.style.color='#fff';}}}
+                        onMouseLeave={e=>{if(!l.highlight){e.currentTarget.style.background='rgba(255,255,255,0.07)';e.currentTarget.style.color='rgba(255,255,255,0.7)';}}}
+                      >Buy</button>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* REVIEWS */}
+          {activeTab==='reviews'&&(
+            <div style={{display:'grid',gridTemplateColumns:'280px 1fr',gap:28}}>
+              {/* Rating summary */}
+              <div>
+                <div style={{padding:'22px',borderRadius:16,background:'rgba(255,255,255,0.025)',border:'1px solid rgba(255,255,255,0.07)',marginBottom:16,textAlign:'center'}}>
+                  <div style={{fontFamily:"'Syne',sans-serif",fontSize:52,fontWeight:800,color:'#D4AF37',lineHeight:1}}>4.8</div>
+                  <Stars rating={4.8} size={16}/>
+                  <div style={{fontSize:12,color:'rgba(255,255,255,0.35)',marginTop:6}}>2,100 reviews</div>
+                  <div style={{marginTop:18,display:'flex',flexDirection:'column',gap:7}}>
+                    {[[5,76],[4,15],[3,6],[2,2],[1,1]].map(([stars,pct])=>(
+                      <div key={stars} style={{display:'flex',alignItems:'center',gap:8}}>
+                        <span style={{fontSize:11,color:'rgba(255,255,255,0.4)',width:8}}>{stars}</span>
+                        <span style={{fontSize:10,color:'#D4AF37'}}>★</span>
+                        <div style={{flex:1,height:5,background:'rgba(255,255,255,0.06)',borderRadius:3,overflow:'hidden'}}>
+                          <div style={{height:'100%',width:`${pct}%`,background:'linear-gradient(90deg,#D4AF37,#f59e0b)',borderRadius:3}}/>
+                        </div>
+                        <span style={{fontSize:11,color:'rgba(255,255,255,0.35)',width:26,textAlign:'right'}}>{pct}%</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div style={{padding:'16px',borderRadius:12,background:'rgba(139,92,246,0.07)',border:'1px solid rgba(139,92,246,0.15)'}}>
+                  <div style={{fontSize:11.5,fontWeight:700,color:'#a78bfa',marginBottom:8}}>✦ AI Review Summary</div>
+                  <div style={{fontSize:12,color:'rgba(255,255,255,0.5)',lineHeight:1.7}}>Users overwhelmingly praise performance and battery life. Minor complaints about port selection on base model. 94% would recommend to a friend.</div>
+                </div>
+              </div>
+
+              {/* Review list */}
+              <div>
+                <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:18}}>
+                  <h3 style={{fontFamily:"'Syne',sans-serif",fontSize:15,fontWeight:700}}>Customer Reviews</h3>
+                  <div style={{display:'flex',gap:6}}>
+                    {['Most Helpful','Most Recent','Lowest First'].map(s=>(
+                      <button key={s} onClick={()=>setActiveReviewSort(s)} style={{padding:'4px 11px',borderRadius:7,fontSize:11,fontWeight:600,cursor:'pointer',background:activeReviewSort===s?'rgba(212,175,55,0.12)':'rgba(255,255,255,0.04)',border:activeReviewSort===s?'1px solid rgba(212,175,55,0.3)':'1px solid rgba(255,255,255,0.07)',color:activeReviewSort===s?'#D4AF37':'rgba(255,255,255,0.38)',fontFamily:'inherit'}}>{s}</button>
+                    ))}
+                  </div>
+                </div>
+                <div style={{display:'flex',flexDirection:'column',gap:12}}>
+                  {REVIEWS.map((r,i)=>(
+                    <div key={i} style={{padding:'20px 22px',borderRadius:14,background:'rgba(255,255,255,0.025)',border:'1px solid rgba(255,255,255,0.07)',transition:'border-color 0.2s'}}
+                      onMouseEnter={e=>e.currentTarget.style.borderColor='rgba(255,255,255,0.12)'}
+                      onMouseLeave={e=>e.currentTarget.style.borderColor='rgba(255,255,255,0.07)'}>
+                      <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',marginBottom:10}}>
+                        <div style={{display:'flex',alignItems:'center',gap:10}}>
+                          <div style={{width:36,height:36,borderRadius:'50%',background:'linear-gradient(135deg,#6d28d9,#4f46e5)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:700,flexShrink:0}}>{r.avatar}</div>
+                          <div>
+                            <div style={{fontSize:13,fontWeight:600,color:'rgba(255,255,255,0.8)'}}>{r.author}</div>
+                            <div style={{display:'flex',alignItems:'center',gap:6,marginTop:1}}>
+                              <Stars rating={r.rating} size={11}/>
+                              {r.verified&&<span style={{fontSize:9.5,color:'#4ade80',background:'rgba(74,222,128,0.08)',padding:'1px 6px',borderRadius:4,fontWeight:600}}>✓ Verified</span>}
+                            </div>
+                          </div>
+                        </div>
+                        <div style={{fontSize:11,color:'rgba(255,255,255,0.25)',fontFamily:"'DM Mono',monospace"}}>{r.date}</div>
+                      </div>
+                      <div style={{fontSize:13.5,fontWeight:600,color:'rgba(255,255,255,0.85)',marginBottom:7}}>{r.title}</div>
+                      <div style={{fontSize:13,color:'rgba(255,255,255,0.52)',lineHeight:1.75}}>{r.body}</div>
+                      <div style={{marginTop:12,display:'flex',alignItems:'center',gap:8}}>
+                        <button style={{padding:'4px 10px',borderRadius:6,background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.08)',fontSize:11,color:'rgba(255,255,255,0.4)',cursor:'pointer',fontFamily:'inherit'}}>👍 Helpful ({r.helpful})</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* SPECS */}
+          {activeTab==='specs'&&(
+            <div style={{maxWidth:700}}>
+              <h2 style={{fontFamily:"'Syne',sans-serif",fontSize:17,fontWeight:800,marginBottom:20}}>Full Specifications</h2>
+              <div style={{borderRadius:14,overflow:'hidden',border:'1px solid rgba(255,255,255,0.07)'}}>
+                {SPECS.map(([k,v],i)=>(
+                  <div key={i} style={{display:'flex',padding:'14px 20px',background:i%2===0?'rgba(255,255,255,0.025)':'rgba(255,255,255,0.01)',borderBottom:i<SPECS.length-1?'1px solid rgba(255,255,255,0.05)':'none',gap:20,alignItems:'flex-start'}}>
+                    <div style={{width:130,fontSize:12.5,color:'rgba(255,255,255,0.38)',fontWeight:500,flexShrink:0,fontFamily:"'DM Mono',monospace",paddingTop:1}}>{k}</div>
+                    <div style={{fontSize:13.5,color:'rgba(255,255,255,0.78)',flex:1,lineHeight:1.5}}>{v}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ALTERNATIVES */}
+          {activeTab==='alternatives'&&(
+            <div>
+              <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:20}}>
+                <h2 style={{fontFamily:"'Syne',sans-serif",fontSize:17,fontWeight:800}}>AI-Recommended Alternatives</h2>
+                <div style={{fontSize:12,color:'rgba(139,92,246,0.7)',fontFamily:"'DM Mono',monospace"}}>✦ Curated by Sicero AI</div>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:16}}>
+                {ALT_PRODUCTS.map((p,i)=>(
+                  <div key={i} style={{borderRadius:16,overflow:'hidden',background:'rgba(255,255,255,0.025)',border:'1px solid rgba(255,255,255,0.07)',transition:'all 0.25s',cursor:'pointer'}}
+                    onMouseEnter={e=>{e.currentTarget.style.borderColor='rgba(212,175,55,0.25)';e.currentTarget.style.transform='translateY(-3px)';}}
+                    onMouseLeave={e=>{e.currentTarget.style.borderColor='rgba(255,255,255,0.07)';e.currentTarget.style.transform='none';}}>
+                    <div style={{height:150,overflow:'hidden',position:'relative',background:'rgba(0,0,0,0.3)'}}>
+                      <img src={p.img} alt={p.name} style={{width:'100%',height:'100%',objectFit:'cover',opacity:0.8}}/>
+                      <div style={{position:'absolute',inset:0,background:'linear-gradient(to top,rgba(8,10,26,0.7) 0%,transparent 50%)'}}/>
+                      <div style={{position:'absolute',top:10,left:10,padding:'3px 8px',borderRadius:6,background:'rgba(212,175,55,0.15)',border:'1px solid rgba(212,175,55,0.3)',fontSize:10,fontWeight:700,color:'#D4AF37'}}>{p.label}</div>
+                    </div>
+                    <div style={{padding:'14px 16px'}}>
+                      <div style={{fontSize:13.5,fontWeight:600,color:'rgba(255,255,255,0.85)',marginBottom:8,lineHeight:1.3}}>{p.name}</div>
+                      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                        <span style={{fontSize:18,fontWeight:800,color:'#D4AF37',fontFamily:"'Syne',sans-serif"}}>${p.price.toLocaleString()}</span>
+                        <div style={{display:'flex',alignItems:'center',gap:6}}>
+                          <span style={{fontSize:10,color:'rgba(255,255,255,0.3)'}}>Score</span>
+                          <span style={{fontSize:13,fontWeight:800,color:'#D4AF37'}}>{p.score}</span>
+                        </div>
+                      </div>
+                      <button style={{marginTop:10,width:'100%',padding:'8px',borderRadius:9,background:'rgba(212,175,55,0.08)',border:'1px solid rgba(212,175,55,0.2)',color:'#D4AF37',fontWeight:600,fontSize:12,cursor:'pointer',fontFamily:'inherit',transition:'all 0.2s'}}
+                        onMouseEnter={e=>{e.currentTarget.style.background='rgba(212,175,55,0.15)';}}
+                        onMouseLeave={e=>{e.currentTarget.style.background='rgba(212,175,55,0.08)';}}>View Product →</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {checkout&&<CheckoutModal listing={checkout} onClose={()=>setCheckout(null)}/>}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
